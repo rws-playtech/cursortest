@@ -13,7 +13,7 @@ export default function RoadmapPage() {
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [filterCategory, setFilterCategory] = useState<string>('all');
 
-  const categories = ['all', ...Array.from(new Set(mockGames.map(g => g.category)))];
+  const categories = ['all', ...Array.from(new Set(mockGames.map(g => g.category).filter((c): c is string => c !== undefined)))];
 
   const filteredGames = filterCategory === 'all' 
     ? mockGames 
