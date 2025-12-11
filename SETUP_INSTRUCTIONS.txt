@@ -1,0 +1,89 @@
+============================================
+MARKETPLACE ROADMAP - SETUP INSTRUCTIONS
+============================================
+
+If you DON'T have Git installed, follow these steps:
+
+STEP 1: Download All Files
+---------------------------
+Go to: https://github.com/rws-playtech/cursortest
+Click the green "Code" button
+Select "Download ZIP"
+Extract the ZIP file to a folder on your computer
+
+STEP 2: Open Terminal/Command Prompt
+-------------------------------------
+Windows: Press Win+R, type "cmd", press Enter
+Mac: Press Cmd+Space, type "terminal", press Enter
+Linux: Press Ctrl+Alt+T
+
+STEP 3: Navigate to the Project Folder
+---------------------------------------
+cd path/to/extracted/cursortest-cursor-redesign-roadmap-page-e025
+
+Example:
+Windows: cd C:\Users\YourName\Downloads\cursortest-cursor-redesign-roadmap-page-e025
+Mac: cd ~/Downloads/cursortest-cursor-redesign-roadmap-page-e025
+
+STEP 4: Install Node.js (if not installed)
+-------------------------------------------
+Check if you have Node.js:
+node --version
+
+If you get an error, download and install Node.js from:
+https://nodejs.org/ (download the LTS version)
+
+STEP 5: Install Project Dependencies
+-------------------------------------
+npm install
+
+(This will take a few minutes)
+
+STEP 6: Start the Development Server
+-------------------------------------
+npm run dev
+
+STEP 7: Open in Browser
+------------------------
+Look for output like:
+  ➜  Local:   http://localhost:5173/
+
+Open that URL in your web browser!
+
+TROUBLESHOOTING
+---------------
+
+Error: "npm not found"
+→ Install Node.js from nodejs.org
+
+Error: "Port 5173 already in use"
+→ The server will automatically try another port, or run:
+  npm run dev -- --port 3000
+
+Error: "Cannot find module"
+→ Delete node_modules folder and package-lock.json, then run:
+  npm install
+
+To STOP the server:
+→ Press Ctrl+C in the terminal
+
+============================================
+WHAT YOU'LL SEE
+============================================
+
+✓ Interactive banner at the top
+✓ Filter by game category
+✓ Switch between Visual and Calendar views
+✓ Expandable game cards
+✓ Request activation with variant selection
+✓ Export roadmap to CSV
+✓ Links to marketing assets and game profiles
+
+All features working with sample data!
+
+============================================
+For questions or issues, refer to:
+- README.md (main documentation)
+- QUICKSTART.md (quick reference)
+- IMPLEMENTATION_NOTES.md (for developers)
+============================================
