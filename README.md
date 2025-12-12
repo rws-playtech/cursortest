@@ -12,7 +12,34 @@ A modern, feature-rich roadmap page for the Playtech Marketplace, showcasing upc
 - **Release Tracking**: View both release dates and brand-specific availability dates
 - **Quick Actions**: Direct links to game profiles and marketing assets
 - **CSV Export**: Export entire roadmap with all relevant details
-- **Category Filtering**: Filter games by category (Slots, Table Games, Video Poker, etc.)
+
+### Advanced Filtering (NEW!)
+- **Category Filter**: Slots, Table Games, Video Poker, etc.
+- **Studio Filter**: Filter by development studio
+- **Theme Filter**: Adventure, Fantasy, Mystical, Classic Casino, etc.
+- **Volatility Filter**: Low, Medium, High, Very High with tooltips
+- **Feature Filter**: Search by specific game features
+- **Game Counts**: See number of games in each filter category
+- **Clear All**: One-click to reset all filters
+
+### Enhanced Game Information (NEW!)
+- **Game Code**: Unique identifier with one-click copy
+- **Cost Information**: Base cost and maximum win multiplier
+- **Jackpot Info**: Simple Yes/No with jackpot type (Progressive, Fixed, Network)
+- **Volatility**: Color-coded badges with detailed tooltips
+- **Win Distribution**: Payout pattern descriptions with explanations
+- **Studio & Theme**: Development studio and game theme metadata
+- **Jurisdictions**: Available regions for each variant
+
+### Marketing Assets (NEW!)
+- **Active/Inactive States**: Visual distinction between available and pending assets
+- **Status Badges**: "Soon" or "Available Soon" indicators
+- **Smart Linking**: Links enabled only when assets are ready
+
+### Calendar Enhancements (NEW!)
+- **Date Type Toggle**: Switch between "Release Date" and "Available on My Brand"
+- **Clear Visual Distinction**: Understand when games launch vs when you can activate them
+- **Flexible Viewing**: See roadmap from different perspectives
 
 ### Visual View
 - Modern card-based layout with game imagery
@@ -262,9 +289,62 @@ Potential additions:
 - Game comparison feature
 - Integration with user preferences
 
+## New Features Documentation
+
+**See detailed documentation in these files:**
+
+- **NEW_FEATURES.md** - Complete list of all new features with examples
+- **INTEGRATION_GUIDE.md** - Technical integration guide for developers
+- **FEATURES.md** - Feature checklist with implementation status
+
+### Quick Links to Key Features
+
+- Game code with copy functionality
+- Advanced multi-filter system
+- Volatility and win distribution with tooltips
+- Jurisdiction information for variants
+- Calendar view with date type toggle
+- Marketing assets active/inactive states
+- Base cost and maximum win values
+- Jackpot information display
+
+## Version History
+
+### Version 2.0.0 (December 2025) - Major Feature Update
+- ✨ Added game code with one-click copy
+- ✨ Added base cost and maximum win multiplier display
+- ✨ Implemented active/inactive states for marketing assets
+- ✨ Added jurisdiction information for each variant
+- ✨ New filters: Studio, Theme, Volatility, Features
+- ✨ Game count badges on all filter buttons
+- ✨ Jackpot information with type indicators
+- ✨ Volatility display with color coding and tooltips
+- ✨ Win distribution information with explanations
+- ✨ Calendar date type toggle (Release vs Available)
+- ✨ Clear all filters button
+- 🎨 Enhanced UI with better information hierarchy
+- 📊 Improved data visualization
+- ♿ Better accessibility with tooltips
+
+### Version 1.0.0 (December 2025) - Initial Release
+- Core roadmap functionality
+- Dual view modes (Visual/Calendar)
+- Banner, filters, CSV export
+- Game cards and detail modal
+- Variant selection system
+
 ## Support
 
 For questions or issues, please contact the development team.
+
+**Documentation Files:**
+- README.md (this file) - Overview and setup
+- NEW_FEATURES.md - Detailed feature descriptions
+- INTEGRATION_GUIDE.md - API and integration details
+- IMPLEMENTATION_NOTES.md - Technical implementation
+- FEATURES.md - Feature checklist
+- QUICKSTART.md - Quick start guide
+- QUICK_START_LOCAL.md - Local setup instructions
 
 ## License
 

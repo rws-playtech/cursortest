@@ -58,20 +58,25 @@
 
 .controls {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
   gap: var(--spacing-lg);
-  padding: var(--spacing-lg);
+  padding: var(--spacing-xl);
   background: var(--color-surface);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
 }
 
+.filtersContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
 .filterGroup {
   display: flex;
-  align-items: center;
+  align-items: start;
   gap: var(--spacing-md);
-  flex: 1;
+  flex-wrap: wrap;
 }
 
 .filterLabel {
@@ -79,6 +84,8 @@
   font-weight: 600;
   color: var(--color-text-secondary);
   white-space: nowrap;
+  min-width: 80px;
+  padding-top: var(--spacing-sm);
 }
 
 .filterButtons {
@@ -97,6 +104,44 @@
   font-weight: 500;
   cursor: pointer;
   transition: all var(--transition-fast);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.filterCount {
+  font-size: 0.75rem;
+  padding: 2px 6px;
+  background: var(--color-border-light);
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+}
+
+.filterButtonActive .filterCount {
+  background: rgba(255, 255, 255, 0.3);
+  color: white;
+}
+
+.clearFiltersButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: var(--color-error);
+  color: white;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  align-self: flex-start;
+  box-shadow: var(--shadow-sm);
+}
+
+.clearFiltersButton:hover {
+  background: #dc2626;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
 .filterButton:hover {

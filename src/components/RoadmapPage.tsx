@@ -12,12 +12,48 @@ export default function RoadmapPage() {
   const [viewMode, setViewMode] = useState<ViewMode>('visual');
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [filterCategory, setFilterCategory] = useState<string>('all');
+  const [filterStudio, setFilterStudio] = useState<string>('all');
+  const [filterTheme, setFilterTheme] = useState<string>('all');
+  const [filterVolatility, setFilterVolatility] = useState<string>('all');
+  const [filterFeature, setFilterFeature] = useState<string>('all');
 
+  // Extract unique values for filters
   const categories = ['all', ...Array.from(new Set(mockGames.map(g => g.category).filter((c): c is string => c !== undefined)))];
+  const studios = ['all', ...Array.from(new Set(mockGames.map(g => g.studio).filter((s): s is string => s !== undefined)))];
+  const themes = ['all', ...Array.from(new Set(mockGames.map(g => g.theme).filter((t): t is string => t !== undefined)))];
+  const volatilities: string[] = ['all', ...Array.from(new Set(mockGames.map(g => g.volatility).filter(v => v !== undefined)))];
+  const allFeatures = Array.from(new Set(mockGames.flatMap(g => g.features || []))).sort();
+  const features = ['all', ...allFeatures];
 
-  const filteredGames = filterCategory === 'all' 
-    ? mockGames 
-    : mockGames.filter(g => g.category === filterCategory);
+  // Count games for each filter value
+  const getFilterCount = (filterType: string, value: string): number => {
+    if (value === 'all') return mockGames.length;
+    
+    switch (filterType) {
+      case 'category':
+        return mockGames.filter(g => g.category === value).length;
+      case 'studio':
+        return mockGames.filter(g => g.studio === value).length;
+      case 'theme':
+        return mockGames.filter(g => g.theme === value).length;
+      case 'volatility':
+        return mockGames.filter(g => g.volatility === value).length;
+      case 'feature':
+        return mockGames.filter(g => g.features?.includes(value)).length;
+      default:
+        return 0;
+    }
+  };
+
+  // Apply all filters
+  const filteredGames = mockGames.filter(game => {
+    if (filterCategory !== 'all' && game.category !== filterCategory) return false;
+    if (filterStudio !== 'all' && game.studio !== filterStudio) return false;
+    if (filterTheme !== 'all' && game.theme !== filterTheme) return false;
+    if (filterVolatility !== 'all' && game.volatility !== filterVolatility) return false;
+    if (filterFeature !== 'all' && !game.features?.includes(filterFeature)) return false;
+    return true;
+  });
 
   const handleBannerClick = () => {
     // Navigate to game profile
@@ -107,22 +143,121 @@ export default function RoadmapPage() {
 
           {/* Controls */}
           <div className={styles.controls}>
-            {/* Category Filter */}
-            <div className={styles.filterGroup}>
-              <label className={styles.filterLabel}>Category:</label>
-              <div className={styles.filterButtons}>
-                {categories.map(category => (
-                  <button
-                    key={category}
-                    className={`${styles.filterButton} ${
-                      filterCategory === category ? styles.filterButtonActive : ''
-                    }`}
-                    onClick={() => setFilterCategory(category)}
-                  >
-                    {category === 'all' ? 'All Games' : category}
-                  </button>
-                ))}
+            <div className={styles.filtersContainer}>
+              {/* Category Filter */}
+              <div className={styles.filterGroup}>
+                <label className={styles.filterLabel}>Category:</label>
+                <div className={styles.filterButtons}>
+                  {categories.map(category => (
+                    <button
+                      key={category}
+                      className={`${styles.filterButton} ${
+                        filterCategory === category ? styles.filterButtonActive : ''
+                      }`}
+                      onClick={() => setFilterCategory(category)}
+                    >
+                      {category === 'all' ? 'All Games' : category}
+                      <span className={styles.filterCount}>{getFilterCount('category', category)}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
+
+              {/* Studio Filter */}
+              <div className={styles.filterGroup}>
+                <label className={styles.filterLabel}>Studio:</label>
+                <div className={styles.filterButtons}>
+                  {studios.map(studio => (
+                    <button
+                      key={studio}
+                      className={`${styles.filterButton} ${
+                        filterStudio === studio ? styles.filterButtonActive : ''
+                      }`}
+                      onClick={() => setFilterStudio(studio)}
+                    >
+                      {studio === 'all' ? 'All Studios' : studio}
+                      <span className={styles.filterCount}>{getFilterCount('studio', studio)}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Theme Filter */}
+              <div className={styles.filterGroup}>
+                <label className={styles.filterLabel}>Theme:</label>
+                <div className={styles.filterButtons}>
+                  {themes.map(theme => (
+                    <button
+                      key={theme}
+                      className={`${styles.filterButton} ${
+                        filterTheme === theme ? styles.filterButtonActive : ''
+                      }`}
+                      onClick={() => setFilterTheme(theme)}
+                    >
+                      {theme === 'all' ? 'All Themes' : theme}
+                      <span className={styles.filterCount}>{getFilterCount('theme', theme)}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Volatility Filter */}
+              <div className={styles.filterGroup}>
+                <label className={styles.filterLabel}>Volatility:</label>
+                <div className={styles.filterButtons}>
+                  {volatilities.map(volatility => (
+                    <button
+                      key={volatility}
+                      className={`${styles.filterButton} ${
+                        filterVolatility === volatility ? styles.filterButtonActive : ''
+                      }`}
+                      onClick={() => setFilterVolatility(volatility || 'all')}
+                    >
+                      {volatility === 'all' ? 'All Levels' : (volatility || 'Unknown')}
+                      <span className={styles.filterCount}>{getFilterCount('volatility', volatility || 'all')}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Feature Filter */}
+              <div className={styles.filterGroup}>
+                <label className={styles.filterLabel}>Feature:</label>
+                <div className={styles.filterButtons}>
+                  {features.map(feature => (
+                    <button
+                      key={feature}
+                      className={`${styles.filterButton} ${
+                        filterFeature === feature ? styles.filterButtonActive : ''
+                      }`}
+                      onClick={() => setFilterFeature(feature)}
+                    >
+                      {feature === 'all' ? 'All Features' : feature}
+                      <span className={styles.filterCount}>{getFilterCount('feature', feature)}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Clear Filters Button */}
+              {(filterCategory !== 'all' || filterStudio !== 'all' || filterTheme !== 'all' || 
+                filterVolatility !== 'all' || filterFeature !== 'all') && (
+                <button
+                  className={styles.clearFiltersButton}
+                  onClick={() => {
+                    setFilterCategory('all');
+                    setFilterStudio('all');
+                    setFilterTheme('all');
+                    setFilterVolatility('all');
+                    setFilterFeature('all');
+                  }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
+                  Clear All Filters
+                </button>
+              )}
             </div>
 
             {/* View Toggle */}

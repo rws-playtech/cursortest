@@ -140,6 +140,108 @@
   line-height: 1.6;
 }
 
+.gameInfoGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.infoItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  position: relative;
+}
+
+.infoLabel {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.infoValue {
+  font-size: 1rem;
+  color: var(--color-text-primary);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+}
+
+.copyCodeButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--color-border-light);
+  color: var(--color-primary);
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: 'Courier New', monospace;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  max-width: fit-content;
+}
+
+.copyCodeButton:hover {
+  background: var(--color-primary);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.copiedBadge {
+  position: absolute;
+  top: -28px;
+  left: 0;
+  padding: var(--spacing-xs) var(--spacing-md);
+  background: var(--color-success);
+  color: white;
+  font-size: 0.875rem;
+  border-radius: var(--radius-md);
+  white-space: nowrap;
+  animation: fadeInOut 2s ease-in-out;
+  box-shadow: var(--shadow-md);
+}
+
+.volatilityBadge {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  color: white;
+  font-size: 0.875rem;
+  display: inline-flex;
+  align-items: center;
+  max-width: fit-content;
+}
+
+.volatilityLow {
+  background: var(--color-success);
+}
+
+.volatilityMedium {
+  background: var(--color-warning);
+}
+
+.volatilityHigh {
+  background: var(--color-accent);
+}
+
+.volatilityVeryHigh {
+  background: var(--color-error);
+}
+
+.jackpotBadge {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, #FFD700, #FFA500);
+  color: var(--color-secondary);
+  font-weight: 700;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  display: inline-block;
+  max-width: fit-content;
+}
+
 .featureList {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -252,6 +354,36 @@
 .variantDescription {
   font-size: 0.875rem;
   color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-sm);
+}
+
+.jurisdictions {
+  margin-top: var(--spacing-sm);
+  padding-top: var(--spacing-sm);
+  border-top: 1px solid var(--color-border-light);
+}
+
+.jurisdictionsLabel {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  display: block;
+  margin-bottom: var(--spacing-xs);
+}
+
+.jurisdictionTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+}
+
+.jurisdictionTag {
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  background: var(--color-primary-light);
+  color: white;
+  border-radius: var(--radius-sm);
+  font-weight: 500;
 }
 
 .modalActions {
@@ -306,6 +438,29 @@
 .btnOutline:hover {
   background: var(--color-primary);
   color: white;
+}
+
+.btnDisabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  position: relative;
+}
+
+.btnDisabled:hover {
+  background: transparent;
+  color: var(--color-primary);
+  transform: none;
+  box-shadow: none;
+}
+
+.unavailableBadge {
+  font-size: 0.75rem;
+  padding: 4px 8px;
+  background: var(--color-warning);
+  color: white;
+  border-radius: var(--radius-sm);
+  margin-left: var(--spacing-sm);
+  font-weight: 600;
 }
 
 @media (max-width: 768px) {

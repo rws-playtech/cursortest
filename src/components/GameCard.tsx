@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Game } from '../types';
 import { format } from 'date-fns';
+import Tooltip from './Tooltip';
 import styles from './GameCard.module.css';
 
 interface GameCardProps {
@@ -10,6 +11,13 @@ interface GameCardProps {
 
 export default function GameCard({ game, onRequestActivation }: GameCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyCode = () => {
+    navigator.clipboard.writeText(game.gameCode);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const isReleaseDateSoon = () => {
     const now = new Date();
@@ -43,6 +51,57 @@ export default function GameCard({ game, onRequestActivation }: GameCardProps) {
           <span className={styles.cardCategory}>{game.category}</span>
         </div>
 
+        <div className={styles.cardMeta}>
+          <div className={styles.metaItem}>
+            <span className={styles.metaLabel}>Code:</span>
+            <button 
+              className={styles.codeButton} 
+              onClick={handleCopyCode}
+              title="Click to copy"
+            >
+              {game.gameCode}
+              <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+              </svg>
+            </button>
+            {copied && <span className={styles.copiedMessage}>Copied!</span>}
+          </div>
+          {game.studio && (
+            <div className={styles.metaItem}>
+              <span className={styles.metaLabel}>Studio:</span>
+              <span className={styles.metaValue}>{game.studio}</span>
+            </div>
+          )}
+          {game.theme && (
+            <div className={styles.metaItem}>
+              <span className={styles.metaLabel}>Theme:</span>
+              <span className={styles.metaValue}>{game.theme}</span>
+            </div>
+          )}
+          {game.volatility && (
+            <div className={styles.metaItem}>
+              <span className={styles.metaLabel}>Volatility:</span>
+              <Tooltip content={getVolatilityTooltip(game.volatility)}>
+                <span className={`${styles.metaValue} ${styles.volatilityBadge} ${styles[`volatility${game.volatility.replace(' ', '')}`]}`}>
+                  {game.volatility}
+                  <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor" style={{ marginLeft: '4px' }}>
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                  </svg>
+                </span>
+              </Tooltip>
+            </div>
+          )}
+          {game.jackpot && game.jackpot.hasJackpot && (
+            <div className={styles.metaItem}>
+              <span className={styles.metaLabel}>Jackpot:</span>
+              <span className={`${styles.metaValue} ${styles.jackpotBadge}`}>
+                {game.jackpot.type || 'Yes'}
+              </span>
+            </div>
+          )}
+        </div>
+
         <p className={styles.cardDescription}>
           {isExpanded ? game.description : `${game.description.substring(0, 100)}...`}
         </p>
@@ -61,6 +120,34 @@ export default function GameCard({ game, onRequestActivation }: GameCardProps) {
                 </div>
               </div>
             )}
+
+            <div className={styles.gameStats}>
+              {game.baseCost !== undefined && (
+                <div className={styles.statItem}>
+                  <span className={styles.statLabel}>Base Cost:</span>
+                  <span className={styles.statValue}>€{game.baseCost.toLocaleString()}</span>
+                </div>
+              )}
+              {game.maxWinMultiplier !== undefined && (
+                <div className={styles.statItem}>
+                  <span className={styles.statLabel}>Max Win:</span>
+                  <span className={styles.statValue}>{game.maxWinMultiplier.toLocaleString()}x</span>
+                </div>
+              )}
+              {game.winDistribution && (
+                <div className={styles.statItem}>
+                  <span className={styles.statLabel}>Win Distribution:</span>
+                  <Tooltip content="How often and how much players can expect to win">
+                    <span className={styles.statValue}>
+                      {game.winDistribution}
+                      <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor" style={{ marginLeft: '4px' }}>
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                      </svg>
+                    </span>
+                  </Tooltip>
+                </div>
+              )}
+            </div>
 
             <div className={styles.dates}>
               <div className={styles.dateItem}>
@@ -94,19 +181,21 @@ export default function GameCard({ game, onRequestActivation }: GameCardProps) {
             {isExpanded ? 'Show Less' : 'Show More'}
           </button>
 
-          {game.marketingAssetsUrl && (
+          {game.marketingAssetsUrl ? (
             <a
-              href={game.marketingAssetsUrl}
-              className={styles.btnOutline}
+              href={game.marketingAssetsAvailable ? game.marketingAssetsUrl : undefined}
+              className={`${styles.btnOutline} ${!game.marketingAssetsAvailable ? styles.btnDisabled : ''}`}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={(e) => !game.marketingAssetsAvailable && e.preventDefault()}
             >
               <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
               </svg>
               Marketing Assets
+              {!game.marketingAssetsAvailable && <span className={styles.unavailableBadge}>Soon</span>}
             </a>
-          )}
+          ) : null}
 
           {game.profileUrl && (
             <a
@@ -136,4 +225,19 @@ export default function GameCard({ game, onRequestActivation }: GameCardProps) {
       </div>
     </div>
   );
+}
+
+function getVolatilityTooltip(volatility: string): string {
+  switch (volatility) {
+    case 'Low':
+      return 'Frequent small wins. Lower risk, steady gameplay.';
+    case 'Medium':
+      return 'Balanced mix of win frequency and value. Moderate risk.';
+    case 'High':
+      return 'Less frequent wins but higher values. Higher risk, bigger potential.';
+    case 'Very High':
+      return 'Rare wins with very high values. Maximum risk and reward potential.';
+    default:
+      return 'Indicates how often and how much the game pays out.';
+  }
 }
