@@ -1,0 +1,1121 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Xenia Improved Reporting — Prototype</title>
+  <style>
+    :root {
+      --bg: #0b1220;
+      --panel: #111a2e;
+      --panel2: #0f172a;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --line: #26324f;
+      --good: #22c55e;
+      --warn: #f59e0b;
+      --bad: #ef4444;
+      --chip: #1f2a44;
+      --accent: #60a5fa;
+    }
+
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      background: radial-gradient(1200px 800px at 20% 0%, #13204a 0%, var(--bg) 55%);
+      color: var(--text);
+    }
+
+    .wrap { max-width: 1200px; margin: 0 auto; padding: 24px; }
+
+    header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+    .title h1 { margin: 0; font-size: 22px; letter-spacing: 0.2px; }
+    .title p { margin: 6px 0 0; color: var(--muted); font-size: 13px; line-height: 1.4; max-width: 820px; }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .card {
+      background: linear-gradient(180deg, var(--panel) 0%, var(--panel2) 100%);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    }
+
+    .filters {
+      padding: 14px;
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+
+    input[type="date"], select, input[type="search"] {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 10px 10px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: #0b142a;
+      color: var(--text);
+      outline: none;
+    }
+
+    .btn {
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: #0b142a;
+      color: var(--text);
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .btn:hover { border-color: #35508b; }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      padding: 10px;
+      border-bottom: 1px solid var(--line);
+    }
+    .tab {
+      padding: 9px 12px;
+      border-radius: 10px;
+      border: 1px solid transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 13px;
+      user-select: none;
+    }
+    .tab.active {
+      color: var(--text);
+      border-color: var(--line);
+      background: #0b142a;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 12px;
+      padding: 12px;
+    }
+
+    .stat {
+      padding: 14px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: rgba(11, 20, 42, 0.6);
+    }
+    .stat .k { color: var(--muted); font-size: 12px; }
+    .stat .v { font-size: 20px; font-weight: 800; margin-top: 6px; }
+    .stat .s { color: var(--muted); font-size: 12px; margin-top: 6px; }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      background: var(--chip);
+      border: 1px solid var(--line);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    .pill {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.2px;
+      white-space: nowrap;
+    }
+    .pill.good { border-color: rgba(34,197,94,0.45); color: var(--good); background: rgba(34,197,94,0.08); }
+    .pill.warn { border-color: rgba(245,158,11,0.55); color: var(--warn); background: rgba(245,158,11,0.08); }
+    .pill.bad { border-color: rgba(239,68,68,0.55); color: var(--bad); background: rgba(239,68,68,0.08); }
+
+    .section { padding: 12px; border-top: 1px solid var(--line); }
+    .section h2 { font-size: 14px; margin: 0 0 10px; color: var(--text); }
+    .muted { color: var(--muted); }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    th, td {
+      text-align: left;
+      padding: 10px 10px;
+      border-bottom: 1px solid rgba(38,50,79,0.75);
+      vertical-align: top;
+    }
+    th { color: var(--muted); font-weight: 800; font-size: 12px; position: sticky; top: 0; background: rgba(17, 26, 46, 0.96); }
+
+    .rowlink {
+      color: inherit;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .rowlink:hover { text-decoration: underline; color: var(--accent); }
+
+    .two {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 12px;
+      padding: 12px;
+      border-top: 1px solid var(--line);
+    }
+
+    pre {
+      margin: 0;
+      padding: 12px;
+      background: rgba(11, 20, 42, 0.65);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: auto;
+      font-size: 12px;
+      line-height: 1.45;
+      color: #cbd5e1;
+      max-height: 380px;
+    }
+
+    .hint {
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px dashed rgba(96,165,250,0.55);
+      background: rgba(96,165,250,0.08);
+      color: #cfe3ff;
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .col-2 { grid-column: span 2; }
+    .col-3 { grid-column: span 3; }
+    .col-4 { grid-column: span 4; }
+    .col-5 { grid-column: span 5; }
+    .col-6 { grid-column: span 6; }
+    .col-7 { grid-column: span 7; }
+    .col-8 { grid-column: span 8; }
+    .col-9 { grid-column: span 9; }
+    .col-10 { grid-column: span 10; }
+    .col-12 { grid-column: span 12; }
+
+    @media (max-width: 980px) {
+      header { flex-direction: column; }
+      .filters { grid-template-columns: repeat(6, 1fr); }
+      .two { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 620px) {
+      .filters { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="title">
+        <h1>Xenia Improved Reporting — Prototype</h1>
+        <p>
+          Consolidated backoffice report prototype for the Engagement Game (EG) funnel, including retriggering behaviour,
+          game launch success/failure (with reasons), prize details (awarded/accepted/declined), and follow-up actions.
+          Built as a static HTML prototype with export.
+        </p>
+      </div>
+      <div class="toolbar">
+        <button class="btn" id="btnExport">Export instances CSV</button>
+        <button class="btn" id="btnExportEvents">Export raw events CSV</button>
+      </div>
+    </header>
+
+    <div class="card">
+      <div class="filters">
+        <div class="col-2">
+          <label for="from">From (qualified date)</label>
+          <input id="from" type="date" />
+        </div>
+        <div class="col-2">
+          <label for="to">To (qualified date)</label>
+          <input id="to" type="date" />
+        </div>
+        <div class="col-2">
+          <label for="operator">Operator</label>
+          <select id="operator"></select>
+        </div>
+        <div class="col-2">
+          <label for="licensee">Licensee</label>
+          <select id="licensee"></select>
+        </div>
+        <div class="col-2">
+          <label for="eg">Engagement Game</label>
+          <select id="eg"></select>
+        </div>
+        <div class="col-2">
+          <label for="launch">Launch status</label>
+          <select id="launch">
+            <option value="">All</option>
+            <option value="LAUNCHED">Launched</option>
+            <option value="LAUNCH_FAILED">Launch failed</option>
+            <option value="NOT_LAUNCHED">Not launched</option>
+          </select>
+        </div>
+
+        <div class="col-3">
+          <label for="retrigger">Retrigger</label>
+          <select id="retrigger">
+            <option value="">All</option>
+            <option value="none">None</option>
+            <option value="manual">Manual (player)</option>
+            <option value="system">System (auto)</option>
+            <option value="mixed">Mixed</option>
+          </select>
+        </div>
+        <div class="col-3">
+          <label for="q">Search (player / instance / campaign)</label>
+          <input id="q" type="search" placeholder="e.g. P-1002 or EG-2025-0004" />
+        </div>
+        <div class="col-6" style="display:flex; gap:10px; align-items:end;">
+          <button class="btn" id="btnReset">Reset filters</button>
+          <div class="chip" title="This is a prototype data model">
+            <span>Data sources:</span>
+            <span class="muted">Player Journey • IMS • Xenia • Client</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <div class="tab active" data-tab="overview">Overview</div>
+        <div class="tab" data-tab="instances">Instances</div>
+        <div class="tab" data-tab="timeline">Timeline</div>
+      </div>
+
+      <div id="tab-overview">
+        <div class="grid" id="overviewStats"></div>
+        <div class="section">
+          <h2>Funnel (qualified → resolved)</h2>
+          <div class="hint" id="funnelHint"></div>
+          <div style="margin-top:10px; overflow:auto; border-radius:12px; border:1px solid var(--line);">
+            <table>
+              <thead>
+                <tr>
+                  <th>Step</th>
+                  <th>Reached</th>
+                  <th>Drop-offs</th>
+                  <th>Top reasons (where applicable)</th>
+                </tr>
+              </thead>
+              <tbody id="funnelBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="two">
+          <div>
+            <h2 style="margin:0 0 10px; font-size:14px;">Launch failure breakdown</h2>
+            <div style="overflow:auto; border-radius:12px; border:1px solid var(--line);">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Failure code</th>
+                    <th>Count</th>
+                    <th>Example follow-up action</th>
+                  </tr>
+                </thead>
+                <tbody id="failBody"></tbody>
+              </table>
+            </div>
+          </div>
+          <div>
+            <h2 style="margin:0 0 10px; font-size:14px;">Prize outcomes</h2>
+            <div style="overflow:auto; border-radius:12px; border:1px solid var(--line);">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Outcome</th>
+                    <th>Count</th>
+                  </tr>
+                </thead>
+                <tbody id="prizeBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-instances" style="display:none;">
+        <div class="section">
+          <h2>Engagement Game instances (one row per player offer)</h2>
+          <div class="muted" style="font-size:13px; line-height:1.4;">
+            This is the consolidated operational report for internal users (Casino CRM team) and external users (licensees).
+            Click an instance to view its event timeline.
+          </div>
+        </div>
+        <div style="overflow:auto; border-radius:12px; border:1px solid var(--line); margin: 0 12px 12px;">
+          <table>
+            <thead>
+              <tr>
+                <th>Instance</th>
+                <th>Player</th>
+                <th>Operator / Licensee</th>
+                <th>EG / Campaign</th>
+                <th>Qualified</th>
+                <th>Message served</th>
+                <th>Retrigger</th>
+                <th>Launch</th>
+                <th>Prize / Result</th>
+                <th>Resolved</th>
+              </tr>
+            </thead>
+            <tbody id="instancesBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="tab-timeline" style="display:none;">
+        <div class="section">
+          <h2>Timeline</h2>
+          <div class="muted" style="font-size:13px; line-height:1.4;" id="timelineSubtitle">
+            Select an instance from the Instances tab.
+          </div>
+        </div>
+        <div class="two">
+          <div>
+            <div style="overflow:auto; border-radius:12px; border:1px solid var(--line);">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Time</th>
+                    <th>Source</th>
+                    <th>Event</th>
+                    <th>Details</th>
+                  </tr>
+                </thead>
+                <tbody id="timelineBody"></tbody>
+              </table>
+            </div>
+          </div>
+          <div>
+            <h2 style="margin:0 0 10px; font-size:14px;">Data contract (prototype)</h2>
+            <pre id="contract"></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top: 14px;" class="hint">
+      <strong>Note:</strong> Behavioural tracking can still live in Mixpanel, but this report assumes a consolidated event stream
+      (from Player Journey + IMS + Xenia + Client) so that failures and follow-up actions are auditable and exportable.
+    </div>
+  </div>
+
+<script>
+  // -----------------------------
+  // Sample data (prototype-only)
+  // -----------------------------
+  // Event types are intentionally aligned to the funnel described in the notes:
+  // qualified → tag_awarded → message_served → offer interaction (defer/decline) → retrigger → launch attempt → result → prize decision.
+
+  const sampleEvents = [
+    // Instance EG-2025-0001: straight-through success, prize accepted
+    ev("2025-12-10T10:01:10Z", "PJ", "qualified", { instance_id:"EG-2025-0001", player_id:"P-1001", operator_id:"OP-A", licensee_id:"LIC-1", eg_id:"Wheel", campaign_id:"CAMP-DEC10", eligibility_rule:"deposit_30d" }),
+    ev("2025-12-10T10:01:12Z", "IMS", "tag_awarded", { instance_id:"EG-2025-0001", player_id:"P-1001", tag:"EG_AVAILABLE" }),
+    ev("2025-12-10T10:01:20Z", "IMS", "message_served", { instance_id:"EG-2025-0001", player_id:"P-1001", message_id:"MSG-9001", channel:"in-app" }),
+    ev("2025-12-10T10:02:02Z", "CLIENT", "game_launch_requested", { instance_id:"EG-2025-0001", player_id:"P-1001", surface:"message" }),
+    ev("2025-12-10T10:02:04Z", "XENIA", "game_launch_succeeded", { instance_id:"EG-2025-0001", player_id:"P-1001", launch_id:"L-111" }),
+    ev("2025-12-10T10:02:20Z", "XENIA", "game_result", { instance_id:"EG-2025-0001", player_id:"P-1001", result:"WIN", prize_id:"PR-50FS", prize_type:"FREE_SPINS", prize_value:50 }),
+    ev("2025-12-10T10:02:22Z", "CLIENT", "prize_presented", { instance_id:"EG-2025-0001", player_id:"P-1001", prize_id:"PR-50FS" }),
+    ev("2025-12-10T10:02:25Z", "CLIENT", "prize_accepted", { instance_id:"EG-2025-0001", player_id:"P-1001", prize_id:"PR-50FS" }),
+
+    // Instance EG-2025-0002: user declines offer in current setup (lost forever)
+    ev("2025-12-10T11:10:10Z", "PJ", "qualified", { instance_id:"EG-2025-0002", player_id:"P-1002", operator_id:"OP-A", licensee_id:"LIC-1", eg_id:"Scratch", campaign_id:"CAMP-DEC10" }),
+    ev("2025-12-10T11:10:12Z", "IMS", "tag_awarded", { instance_id:"EG-2025-0002", player_id:"P-1002", tag:"EG_AVAILABLE" }),
+    ev("2025-12-10T11:10:20Z", "IMS", "message_served", { instance_id:"EG-2025-0002", player_id:"P-1002", message_id:"MSG-9002", channel:"in-app" }),
+    ev("2025-12-10T11:10:33Z", "CLIENT", "offer_declined", { instance_id:"EG-2025-0002", player_id:"P-1002", reason:"player_declined_now" }),
+
+    // Instance EG-2025-0003: defer + system retrigger + launch success but bad luck
+    ev("2025-12-10T12:20:00Z", "PJ", "qualified", { instance_id:"EG-2025-0003", player_id:"P-1003", operator_id:"OP-A", licensee_id:"LIC-2", eg_id:"Wheel", campaign_id:"CAMP-DEC10" }),
+    ev("2025-12-10T12:20:03Z", "IMS", "tag_awarded", { instance_id:"EG-2025-0003", player_id:"P-1003", tag:"EG_AVAILABLE" }),
+    ev("2025-12-10T12:20:10Z", "IMS", "message_served", { instance_id:"EG-2025-0003", player_id:"P-1003", message_id:"MSG-9003" }),
+    ev("2025-12-10T12:20:25Z", "CLIENT", "offer_deferred", { instance_id:"EG-2025-0003", player_id:"P-1003", reason:"maybe_later" }),
+    ev("2025-12-10T12:50:00Z", "XENIA", "retrigger_fired", { instance_id:"EG-2025-0003", player_id:"P-1003", retrigger:{ method:"system", schedule:"+30m", attempt:1 } }),
+    ev("2025-12-10T12:50:04Z", "IMS", "message_served", { instance_id:"EG-2025-0003", player_id:"P-1003", message_id:"MSG-9013", retrigger:{ method:"system", attempt:1 } }),
+    ev("2025-12-10T12:51:10Z", "CLIENT", "game_launch_requested", { instance_id:"EG-2025-0003", player_id:"P-1003", surface:"message" }),
+    ev("2025-12-10T12:51:12Z", "XENIA", "game_launch_succeeded", { instance_id:"EG-2025-0003", player_id:"P-1003", launch_id:"L-333" }),
+    ev("2025-12-10T12:51:30Z", "XENIA", "game_result", { instance_id:"EG-2025-0003", player_id:"P-1003", result:"NO_PRIZE" }),
+
+    // Instance EG-2025-0004: launch fails (eg service) + follow-up retrigger manual
+    ev("2025-12-10T14:05:10Z", "PJ", "qualified", { instance_id:"EG-2025-0004", player_id:"P-1004", operator_id:"OP-B", licensee_id:"LIC-3", eg_id:"Wheel", campaign_id:"CAMP-DEC10" }),
+    ev("2025-12-10T14:05:13Z", "IMS", "tag_awarded", { instance_id:"EG-2025-0004", player_id:"P-1004", tag:"EG_AVAILABLE" }),
+    ev("2025-12-10T14:05:22Z", "IMS", "message_served", { instance_id:"EG-2025-0004", player_id:"P-1004", message_id:"MSG-9004" }),
+    ev("2025-12-10T14:06:10Z", "CLIENT", "game_launch_requested", { instance_id:"EG-2025-0004", player_id:"P-1004", surface:"message" }),
+    ev("2025-12-10T14:06:12Z", "XENIA", "game_launch_failed", { instance_id:"EG-2025-0004", player_id:"P-1004", failure:{ code:"EG_SERVICE_UNAVAILABLE", detail:"503 from EG" }, follow_up:{ action:"retrigger_allowed", suggested:"retry_later" } }),
+    ev("2025-12-10T14:40:00Z", "CLIENT", "retrigger_fired", { instance_id:"EG-2025-0004", player_id:"P-1004", retrigger:{ method:"manual", surface:"engagement_hub", attempt:1 } }),
+    ev("2025-12-10T14:40:02Z", "IMS", "message_served", { instance_id:"EG-2025-0004", player_id:"P-1004", message_id:"MSG-9024", retrigger:{ method:"manual", attempt:1 } }),
+
+    // Instance EG-2025-0005: win prize but player declines prize
+    ev("2025-12-11T09:10:01Z", "PJ", "qualified", { instance_id:"EG-2025-0005", player_id:"P-1005", operator_id:"OP-A", licensee_id:"LIC-2", eg_id:"Scratch", campaign_id:"CAMP-DEC11" }),
+    ev("2025-12-11T09:10:03Z", "IMS", "tag_awarded", { instance_id:"EG-2025-0005", player_id:"P-1005", tag:"EG_AVAILABLE" }),
+    ev("2025-12-11T09:10:08Z", "IMS", "message_served", { instance_id:"EG-2025-0005", player_id:"P-1005", message_id:"MSG-9105" }),
+    ev("2025-12-11T09:11:20Z", "CLIENT", "game_launch_requested", { instance_id:"EG-2025-0005", player_id:"P-1005" }),
+    ev("2025-12-11T09:11:21Z", "XENIA", "game_launch_succeeded", { instance_id:"EG-2025-0005", player_id:"P-1005", launch_id:"L-555" }),
+    ev("2025-12-11T09:11:40Z", "XENIA", "game_result", { instance_id:"EG-2025-0005", player_id:"P-1005", result:"WIN", prize_id:"PR-10BON", prize_type:"BONUS", prize_value:10, currency:"EUR" }),
+    ev("2025-12-11T09:11:42Z", "CLIENT", "prize_presented", { instance_id:"EG-2025-0005", player_id:"P-1005", prize_id:"PR-10BON" }),
+    ev("2025-12-11T09:11:46Z", "CLIENT", "prize_declined", { instance_id:"EG-2025-0005", player_id:"P-1005", prize_id:"PR-10BON", reason:"player_declined_prize" }),
+
+    // Instance EG-2025-0006: message never served (IMS failure)
+    ev("2025-12-11T12:00:00Z", "PJ", "qualified", { instance_id:"EG-2025-0006", player_id:"P-1006", operator_id:"OP-B", licensee_id:"LIC-3", eg_id:"Wheel", campaign_id:"CAMP-DEC11" }),
+    ev("2025-12-11T12:00:02Z", "IMS", "tag_awarded", { instance_id:"EG-2025-0006", player_id:"P-1006", tag:"EG_AVAILABLE" }),
+    ev("2025-12-11T12:00:05Z", "IMS", "message_failed", { instance_id:"EG-2025-0006", player_id:"P-1006", failure:{ code:"IMS_MESSAGE_DELIVERY_FAILED", detail:"timeout" }, follow_up:{ action:"retrigger_scheduled", suggested:"retry" } }),
+
+    // Instance EG-2025-0007: player never launches (deferred, not retriggered yet)
+    ev("2025-12-12T08:00:00Z", "PJ", "qualified", { instance_id:"EG-2025-0007", player_id:"P-1007", operator_id:"OP-A", licensee_id:"LIC-1", eg_id:"Wheel", campaign_id:"CAMP-DEC12" }),
+    ev("2025-12-12T08:00:03Z", "IMS", "tag_awarded", { instance_id:"EG-2025-0007", player_id:"P-1007", tag:"EG_AVAILABLE" }),
+    ev("2025-12-12T08:00:10Z", "IMS", "message_served", { instance_id:"EG-2025-0007", player_id:"P-1007", message_id:"MSG-9207" }),
+    ev("2025-12-12T08:00:22Z", "CLIENT", "offer_deferred", { instance_id:"EG-2025-0007", player_id:"P-1007", reason:"maybe_later" })
+  ];
+
+  function ev(ts, source_system, event_type, props) {
+    return {
+      event_id: `EV-${Math.random().toString(16).slice(2, 10)}-${Date.parse(ts)}`,
+      ts,
+      source_system,
+      event_type,
+      ...props
+    };
+  }
+
+  // -----------------------------
+  // Reporting logic (prototype-only)
+  // -----------------------------
+
+  const contract = {
+    description: "Consolidated EG reporting event (prototype)",
+    required: ["event_id", "ts", "source_system", "event_type", "instance_id", "player_id"],
+    common_dimensions: {
+      operator_id: "Operator identifier",
+      licensee_id: "Licensee identifier",
+      eg_id: "Engagement game id/type",
+      campaign_id: "Backoffice campaign / configuration id",
+      jurisdiction: "Optional jurisdiction/market",
+      brand_id: "Optional brand",
+    },
+    retrigger: {
+      method: "manual | system",
+      surface: "engagement_hub | message | ...",
+      schedule: "e.g. +30m, on_next_game_launch",
+      attempt: "1..N",
+    },
+    failure: {
+      code: "Stable machine-readable code",
+      detail: "Human-readable detail for support/ops (exportable)",
+      http_status: "Optional",
+    },
+    follow_up: {
+      action: "e.g. retrigger_allowed | retrigger_scheduled | expired | none",
+      suggested: "e.g. retry_later | contact_support",
+    },
+    prize: {
+      prize_id: "Identifier",
+      prize_type: "FREE_SPINS | BONUS | CASH | ...",
+      prize_value: "Number",
+      currency: "Optional",
+    }
+  };
+
+  const els = {
+    from: document.getElementById("from"),
+    to: document.getElementById("to"),
+    operator: document.getElementById("operator"),
+    licensee: document.getElementById("licensee"),
+    eg: document.getElementById("eg"),
+    launch: document.getElementById("launch"),
+    retrigger: document.getElementById("retrigger"),
+    q: document.getElementById("q"),
+    btnReset: document.getElementById("btnReset"),
+    btnExport: document.getElementById("btnExport"),
+    btnExportEvents: document.getElementById("btnExportEvents"),
+    overviewStats: document.getElementById("overviewStats"),
+    funnelBody: document.getElementById("funnelBody"),
+    funnelHint: document.getElementById("funnelHint"),
+    instancesBody: document.getElementById("instancesBody"),
+    timelineBody: document.getElementById("timelineBody"),
+    timelineSubtitle: document.getElementById("timelineSubtitle"),
+    failBody: document.getElementById("failBody"),
+    prizeBody: document.getElementById("prizeBody"),
+    contract: document.getElementById("contract"),
+  };
+
+  els.contract.textContent = JSON.stringify(contract, null, 2);
+
+  function uniq(arr) { return Array.from(new Set(arr.filter(Boolean))); }
+
+  function parseISO(ts) { return new Date(ts); }
+
+  function fmt(ts) {
+    if (!ts) return "—";
+    const d = parseISO(ts);
+    return d.toISOString().replace("T", " ").replace(".000Z", "Z");
+  }
+
+  function groupByInstance(events) {
+    const map = new Map();
+    for (const e of events) {
+      if (!e.instance_id) continue;
+      if (!map.has(e.instance_id)) map.set(e.instance_id, []);
+      map.get(e.instance_id).push(e);
+    }
+    for (const [k, list] of map.entries()) {
+      list.sort((a,b) => Date.parse(a.ts) - Date.parse(b.ts));
+      map.set(k, list);
+    }
+    return map;
+  }
+
+  function getFirst(events, type) {
+    const f = events.find(e => e.event_type === type);
+    return f ? f.ts : null;
+  }
+
+  function getLast(events, predicate) {
+    for (let i = events.length - 1; i >= 0; i--) {
+      if (predicate(events[i])) return events[i];
+    }
+    return null;
+  }
+
+  function instanceSummary(events) {
+    const base = events[0] || {};
+
+    const qualified = getFirst(events, "qualified");
+    const tag = getFirst(events, "tag_awarded");
+    const msg = getFirst(events, "message_served");
+
+    const deferred = getFirst(events, "offer_deferred");
+    const declinedOffer = getFirst(events, "offer_declined");
+
+    const launchReqCount = events.filter(e => e.event_type === "game_launch_requested").length;
+    const launchOk = getFirst(events, "game_launch_succeeded");
+    const launchFail = getLast(events, e => e.event_type === "game_launch_failed");
+
+    const msgFail = getLast(events, e => e.event_type === "message_failed");
+
+    const result = getLast(events, e => e.event_type === "game_result");
+
+    const prizePresented = getFirst(events, "prize_presented");
+    const prizeAccepted = getFirst(events, "prize_accepted");
+    const prizeDeclined = getFirst(events, "prize_declined");
+
+    const retriggers = events
+      .filter(e => e.event_type === "retrigger_fired" || (e.event_type === "message_served" && e.retrigger))
+      .map(e => e.retrigger || null)
+      .filter(Boolean);
+
+    const retriggerCount = uniq(retriggers.map(r => `${r.method || "?"}:${r.attempt || "?"}`)).length;
+    const hasManual = retriggers.some(r => r.method === "manual");
+    const hasSystem = retriggers.some(r => r.method === "system");
+    const retriggerMode = retriggerCount === 0 ? "none" : (hasManual && hasSystem ? "mixed" : (hasManual ? "manual" : "system"));
+
+    let launchStatus = "NOT_LAUNCHED";
+    if (launchOk) launchStatus = "LAUNCHED";
+    else if (launchFail) launchStatus = "LAUNCH_FAILED";
+
+    // Resolution heuristic (prototype): offer declined OR prize accepted/declined OR no-prize result.
+    let resolvedAt = null;
+    if (declinedOffer) resolvedAt = declinedOffer;
+    else if (prizeAccepted) resolvedAt = prizeAccepted;
+    else if (prizeDeclined) resolvedAt = prizeDeclined;
+    else if (result && result.result === "NO_PRIZE") resolvedAt = result.ts;
+
+    // Prize details
+    const prizeId = result?.prize_id || null;
+    const prizeType = result?.prize_type || null;
+    const prizeValue = result?.prize_value ?? null;
+
+    let prizeStatus = "—";
+    if (result?.result === "NO_PRIZE") prizeStatus = "Bad luck";
+    if (result?.result === "WIN" && prizePresented && !prizeAccepted && !prizeDeclined) prizeStatus = "Presented";
+    if (prizeAccepted) prizeStatus = "Accepted";
+    if (prizeDeclined) prizeStatus = "Declined";
+
+    // Failure (launch or message)
+    const failureCode = launchFail?.failure?.code || msgFail?.failure?.code || null;
+
+    // Follow-up
+    const followUp = launchFail?.follow_up?.action || msgFail?.follow_up?.action || (declinedOffer ? "lost_offer" : null);
+
+    return {
+      instance_id: base.instance_id,
+      player_id: base.player_id,
+      operator_id: base.operator_id,
+      licensee_id: base.licensee_id,
+      eg_id: base.eg_id,
+      campaign_id: base.campaign_id,
+
+      qualified_at: qualified,
+      tag_awarded_at: tag,
+      message_served_at: msg,
+
+      offer_deferred_at: deferred,
+      offer_declined_at: declinedOffer,
+
+      retrigger_mode: retriggerMode,
+      retrigger_count: retriggerCount,
+
+      launch_requests: launchReqCount,
+      launch_status: launchStatus,
+      launch_failed_code: launchFail?.failure?.code || null,
+
+      result: result?.result || "—",
+      prize_id: prizeId,
+      prize_type: prizeType,
+      prize_value: prizeValue,
+      prize_status: prizeStatus,
+
+      failure_code: failureCode,
+      follow_up_action: followUp,
+      resolved_at: resolvedAt,
+    };
+  }
+
+  const byInstance = groupByInstance(sampleEvents);
+  const allInstances = Array.from(byInstance.values()).map(instanceSummary);
+
+  function dateOnly(ts) {
+    if (!ts) return null;
+    return parseISO(ts).toISOString().slice(0,10);
+  }
+
+  function applyFilters(instances) {
+    const from = els.from.value || "";
+    const to = els.to.value || "";
+
+    const op = els.operator.value || "";
+    const lic = els.licensee.value || "";
+    const eg = els.eg.value || "";
+    const launch = els.launch.value || "";
+    const retrigger = els.retrigger.value || "";
+    const q = (els.q.value || "").trim().toLowerCase();
+
+    return instances.filter(r => {
+      const qd = dateOnly(r.qualified_at) || "";
+      if (from && qd < from) return false;
+      if (to && qd > to) return false;
+
+      if (op && r.operator_id !== op) return false;
+      if (lic && r.licensee_id !== lic) return false;
+      if (eg && r.eg_id !== eg) return false;
+      if (launch && r.launch_status !== launch) return false;
+      if (retrigger && r.retrigger_mode !== retrigger) return false;
+
+      if (q) {
+        const hay = `${r.player_id} ${r.instance_id} ${r.campaign_id}`.toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    });
+  }
+
+  function pillForLaunch(status) {
+    if (status === "LAUNCHED") return pill("LAUNCHED", "good");
+    if (status === "LAUNCH_FAILED") return pill("LAUNCH FAILED", "bad");
+    return pill("NOT LAUNCHED", "warn");
+  }
+
+  function pill(text, cls) {
+    return `<span class="pill ${cls}">${escapeHtml(text)}</span>`;
+  }
+
+  function escapeHtml(s) {
+    return String(s ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
+  }
+
+  function renderSelect(selectEl, values, labelAll = "All") {
+    const opts = ["", ...values];
+    selectEl.innerHTML = opts.map(v => {
+      const label = v === "" ? labelAll : v;
+      return `<option value="${escapeHtml(v)}">${escapeHtml(label)}</option>`;
+    }).join("");
+  }
+
+  function renderOverview(instances, events) {
+    const total = instances.length;
+    const launched = instances.filter(r => r.launch_status === "LAUNCHED").length;
+    const launchFailed = instances.filter(r => r.launch_status === "LAUNCH_FAILED").length;
+    const notLaunched = instances.filter(r => r.launch_status === "NOT_LAUNCHED").length;
+
+    const deferred = instances.filter(r => !!r.offer_deferred_at).length;
+    const declinedOffer = instances.filter(r => !!r.offer_declined_at).length;
+
+    const retriggered = instances.filter(r => r.retrigger_count > 0).length;
+
+    const wins = instances.filter(r => r.result === "WIN").length;
+    const noPrize = instances.filter(r => r.result === "NO_PRIZE").length;
+
+    const prizeAccepted = instances.filter(r => r.prize_status === "Accepted").length;
+    const prizeDeclined = instances.filter(r => r.prize_status === "Declined").length;
+
+    const pct = (a, b) => (b ? `${Math.round((a / b) * 100)}%` : "—");
+
+    const stats = [
+      { k: "Qualified (instances)", v: total, s: "Unique player EG offers in filter" },
+      { k: "Message served", v: instances.filter(r => !!r.message_served_at).length, s: `Coverage ${pct(instances.filter(r => !!r.message_served_at).length, total)}` },
+      { k: "Retriggered", v: retriggered, s: `Of deferred/failed flows: ${pct(retriggered, total)}` },
+      { k: "Launch success", v: launched, s: `Success rate: ${pct(launched, total)}` },
+      { k: "Launch failed", v: launchFailed, s: `Failure rate: ${pct(launchFailed, total)}` },
+      { k: "Not launched", v: notLaunched, s: `Includes deferred/ignored: ${pct(notLaunched, total)}` },
+      { k: "Offer deferred", v: deferred, s: `Maybe later: ${pct(deferred, total)}` },
+      { k: "Offer declined", v: declinedOffer, s: `Lost forever (current setup): ${pct(declinedOffer, total)}` },
+      { k: "Wins", v: wins, s: `Win rate (of launched): ${pct(wins, launched)}` },
+      { k: "Bad luck", v: noPrize, s: `No prize outcomes: ${pct(noPrize, launched)}` },
+      { k: "Prize accepted", v: prizeAccepted, s: `Acceptance (of wins): ${pct(prizeAccepted, wins)}` },
+      { k: "Prize declined", v: prizeDeclined, s: `Decline (of wins): ${pct(prizeDeclined, wins)}` },
+    ];
+
+    els.overviewStats.innerHTML = stats.map(s => `
+      <div class="stat col-3">
+        <div class="k">${escapeHtml(s.k)}</div>
+        <div class="v">${escapeHtml(s.v)}</div>
+        <div class="s">${escapeHtml(s.s)}</div>
+      </div>
+    `).join("");
+
+    els.funnelHint.textContent =
+      "Funnel definition (prototype): qualified → tag_awarded → message_served → (launch_succeeded | launch_failed | offer_declined) → game_result → (prize_accepted | prize_declined | no_prize).";
+
+    // Funnel steps
+    const step = (name, reached, drop, reasons) => ({ name, reached, drop, reasons });
+
+    const reachedQualified = total;
+    const reachedTag = instances.filter(r => !!r.tag_awarded_at).length;
+    const reachedMsg = instances.filter(r => !!r.message_served_at).length;
+    const reachedLaunchReq = instances.filter(r => r.launch_requests > 0).length;
+    const reachedLaunchOk = instances.filter(r => r.launch_status === "LAUNCHED").length;
+    const reachedResult = instances.filter(r => r.result !== "—").length;
+    const reachedResolved = instances.filter(r => !!r.resolved_at).length;
+
+    const topFailureReasons = topN(
+      instances.filter(r => r.launch_status === "LAUNCH_FAILED").map(r => r.launch_failed_code || "UNKNOWN"),
+      3
+    );
+
+    const msgFailureReasons = topN(
+      events.filter(e => e.event_type === "message_failed").map(e => e.failure?.code || "UNKNOWN"),
+      3
+    );
+
+    const rows = [
+      step("Qualified", reachedQualified, "—", "—"),
+      step("Tag awarded", reachedTag, reachedQualified - reachedTag, "Missing tag award (IMS/PJ integration gap)") ,
+      step("Message served", reachedMsg, reachedTag - reachedMsg, msgFailureReasons.length ? msgFailureReasons.map(x => `${x.key} (${x.count})`).join(", ") : "—"),
+      step("Launch requested", reachedLaunchReq, reachedMsg - reachedLaunchReq, "Player didn’t engage / deferred / offer lost"),
+      step("Launch succeeded", reachedLaunchOk, reachedLaunchReq - reachedLaunchOk, topFailureReasons.length ? topFailureReasons.map(x => `${x.key} (${x.count})`).join(", ") : "—"),
+      step("Game result recorded", reachedResult, reachedLaunchOk - reachedResult, "Result event missing (tracking gap)") ,
+      step("Resolved", reachedResolved, reachedResult - reachedResolved, "Awaiting prize decision / follow-up")
+    ];
+
+    els.funnelBody.innerHTML = rows.map(r => `
+      <tr>
+        <td>${escapeHtml(r.name)}</td>
+        <td><strong>${escapeHtml(r.reached)}</strong></td>
+        <td>${escapeHtml(r.drop)}</td>
+        <td class="muted">${escapeHtml(r.reasons)}</td>
+      </tr>
+    `).join("");
+
+    // Failure breakdown
+    const failCounts = topN(
+      events.filter(e => e.event_type === "game_launch_failed").map(e => e.failure?.code || "UNKNOWN"),
+      50
+    );
+
+    els.failBody.innerHTML = (failCounts.length ? failCounts : [{key:"—", count:0}]).map(x => {
+      const action = x.key === "EG_SERVICE_UNAVAILABLE" ? "Allow retrigger; suggest retry" :
+        x.key === "IMS_MESSAGE_DELIVERY_FAILED" ? "Schedule retrigger to resend message" :
+        x.key === "UNKNOWN" ? "Investigate logs; add stable failure codes" :
+        "Define follow-up action";
+      return `
+        <tr>
+          <td><span class="chip">${escapeHtml(x.key)}</span></td>
+          <td><strong>${escapeHtml(x.count)}</strong></td>
+          <td class="muted">${escapeHtml(action)}</td>
+        </tr>
+      `;
+    }).join("");
+
+    // Prize outcomes
+    const prizeCounts = countBy(instances, r => r.prize_status);
+    const ordered = ["Accepted", "Declined", "Presented", "Bad luck", "—"].filter(k => prizeCounts[k] != null);
+    const rows2 = ordered.map(k => ({ key: k, count: prizeCounts[k] }));
+    els.prizeBody.innerHTML = rows2.map(x => `
+      <tr>
+        <td>${escapeHtml(x.key)}</td>
+        <td><strong>${escapeHtml(x.count)}</strong></td>
+      </tr>
+    `).join("");
+  }
+
+  function renderInstances(instances) {
+    els.instancesBody.innerHTML = instances.map(r => {
+      const retr = r.retrigger_count === 0
+        ? `<span class="chip">none</span>`
+        : `<span class="chip">${escapeHtml(r.retrigger_mode)} • ${escapeHtml(r.retrigger_count)}</span>`;
+
+      const prize = r.result === "WIN"
+        ? `<div><strong>${escapeHtml(r.prize_type || "Prize")}</strong> <span class="muted">${escapeHtml(r.prize_value ?? "")}${r.currency ? " " + escapeHtml(r.currency) : ""}</span></div><div class="muted">${escapeHtml(r.prize_status)}</div>`
+        : `<div class="muted">${escapeHtml(r.prize_status)}</div>`;
+
+      const launch = r.launch_status === "LAUNCH_FAILED" && r.launch_failed_code
+        ? `${pillForLaunch(r.launch_status)}<div class="muted">${escapeHtml(r.launch_failed_code)}</div>`
+        : `${pillForLaunch(r.launch_status)}`;
+
+      const resolved = r.resolved_at
+        ? pill("RESOLVED", "good")
+        : pill("OPEN", "warn");
+
+      return `
+        <tr>
+          <td><a class="rowlink" data-instance="${escapeHtml(r.instance_id)}">${escapeHtml(r.instance_id)}</a></td>
+          <td>${escapeHtml(r.player_id)}</td>
+          <td>${escapeHtml(r.operator_id || "—")}<div class="muted">${escapeHtml(r.licensee_id || "—")}</div></td>
+          <td>${escapeHtml(r.eg_id || "—")}<div class="muted">${escapeHtml(r.campaign_id || "—")}</div></td>
+          <td>${escapeHtml(fmt(r.qualified_at))}</td>
+          <td>${escapeHtml(fmt(r.message_served_at))}</td>
+          <td>${retr}</td>
+          <td>${launch}</td>
+          <td>${prize}</td>
+          <td>${resolved}<div class="muted">${escapeHtml(fmt(r.resolved_at))}</div></td>
+        </tr>
+      `;
+    }).join("");
+
+    // Click handlers to open timeline
+    for (const a of els.instancesBody.querySelectorAll("a[data-instance]")) {
+      a.addEventListener("click", () => {
+        const id = a.getAttribute("data-instance");
+        selectInstance(id);
+        activateTab("timeline");
+      });
+    }
+  }
+
+  function renderTimeline(instanceId) {
+    if (!instanceId || !byInstance.has(instanceId)) {
+      els.timelineSubtitle.textContent = "Select an instance from the Instances tab.";
+      els.timelineBody.innerHTML = "";
+      return;
+    }
+
+    const events = byInstance.get(instanceId);
+    const head = events[0] || {};
+    els.timelineSubtitle.textContent = `${instanceId} • Player ${head.player_id || "—"} • EG ${head.eg_id || "—"} • Campaign ${head.campaign_id || "—"}`;
+
+    els.timelineBody.innerHTML = events.map(e => {
+      const details = {
+        failure: e.failure || undefined,
+        retrigger: e.retrigger || undefined,
+        follow_up: e.follow_up || undefined,
+        tag: e.tag || undefined,
+        message_id: e.message_id || undefined,
+        channel: e.channel || undefined,
+        surface: e.surface || undefined,
+        result: e.result || undefined,
+        prize_id: e.prize_id || undefined,
+        prize_type: e.prize_type || undefined,
+        prize_value: e.prize_value ?? undefined,
+        currency: e.currency || undefined,
+        eligibility_rule: e.eligibility_rule || undefined,
+        reason: e.reason || undefined,
+      };
+      Object.keys(details).forEach(k => details[k] === undefined && delete details[k]);
+
+      return `
+        <tr>
+          <td>${escapeHtml(fmt(e.ts))}</td>
+          <td><span class="chip">${escapeHtml(e.source_system)}</span></td>
+          <td><strong>${escapeHtml(e.event_type)}</strong></td>
+          <td><span class="muted">${escapeHtml(JSON.stringify(details))}</span></td>
+        </tr>
+      `;
+    }).join("");
+  }
+
+  function countBy(arr, keyFn) {
+    const m = {};
+    for (const a of arr) {
+      const k = keyFn(a);
+      m[k] = (m[k] || 0) + 1;
+    }
+    return m;
+  }
+
+  function topN(items, n) {
+    const m = {};
+    for (const x of items) m[x] = (m[x] || 0) + 1;
+    return Object.entries(m)
+      .map(([key, count]) => ({ key, count }))
+      .sort((a,b) => b.count - a.count)
+      .slice(0, n);
+  }
+
+  // -----------------------------
+  // Tabs + interactions
+  // -----------------------------
+
+  let selectedInstance = null;
+
+  function activateTab(name) {
+    for (const t of document.querySelectorAll(".tab")) {
+      t.classList.toggle("active", t.getAttribute("data-tab") === name);
+    }
+    document.getElementById("tab-overview").style.display = name === "overview" ? "" : "none";
+    document.getElementById("tab-instances").style.display = name === "instances" ? "" : "none";
+    document.getElementById("tab-timeline").style.display = name === "timeline" ? "" : "none";
+  }
+
+  for (const t of document.querySelectorAll(".tab")) {
+    t.addEventListener("click", () => activateTab(t.getAttribute("data-tab")));
+  }
+
+  function selectInstance(id) {
+    selectedInstance = id;
+    renderTimeline(selectedInstance);
+  }
+
+  function refresh() {
+    const inst = applyFilters(allInstances);
+    const filteredIds = new Set(inst.map(x => x.instance_id));
+    const evs = sampleEvents.filter(e => filteredIds.has(e.instance_id));
+
+    renderOverview(inst, evs);
+    renderInstances(inst);
+    if (selectedInstance && filteredIds.has(selectedInstance)) renderTimeline(selectedInstance);
+    else renderTimeline(null);
+  }
+
+  function resetFilters() {
+    els.from.value = "";
+    els.to.value = "";
+    els.operator.value = "";
+    els.licensee.value = "";
+    els.eg.value = "";
+    els.launch.value = "";
+    els.retrigger.value = "";
+    els.q.value = "";
+    refresh();
+  }
+
+  function download(filename, content, mime) {
+    const blob = new Blob([content], { type: mime || "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  function toCsv(rows, columns) {
+    const esc = (v) => {
+      const s = v === null || v === undefined ? "" : String(v);
+      const needs = /[",\n\r]/.test(s);
+      const out = s.replaceAll('"', '""');
+      return needs ? `"${out}"` : out;
+    };
+    const header = columns.join(",");
+    const lines = rows.map(r => columns.map(c => esc(r[c])).join(","));
+    return [header, ...lines].join("\n");
+  }
+
+  els.btnExport.addEventListener("click", () => {
+    const inst = applyFilters(allInstances);
+    const cols = [
+      "instance_id","player_id","operator_id","licensee_id","eg_id","campaign_id",
+      "qualified_at","tag_awarded_at","message_served_at","offer_deferred_at","offer_declined_at",
+      "retrigger_mode","retrigger_count","launch_requests","launch_status","launch_failed_code",
+      "result","prize_id","prize_type","prize_value","prize_status","failure_code","follow_up_action","resolved_at"
+    ];
+    download("xenia-eg-instances.csv", toCsv(inst, cols), "text/csv");
+  });
+
+  els.btnExportEvents.addEventListener("click", () => {
+    const inst = applyFilters(allInstances);
+    const ids = new Set(inst.map(x => x.instance_id));
+    const evs = sampleEvents.filter(e => ids.has(e.instance_id));
+
+    const flat = evs.map(e => ({
+      event_id: e.event_id,
+      ts: e.ts,
+      source_system: e.source_system,
+      event_type: e.event_type,
+      instance_id: e.instance_id,
+      player_id: e.player_id,
+      operator_id: e.operator_id || "",
+      licensee_id: e.licensee_id || "",
+      eg_id: e.eg_id || "",
+      campaign_id: e.campaign_id || "",
+      retrigger_method: e.retrigger?.method || "",
+      retrigger_attempt: e.retrigger?.attempt || "",
+      failure_code: e.failure?.code || "",
+      failure_detail: e.failure?.detail || "",
+      follow_up_action: e.follow_up?.action || "",
+      result: e.result || "",
+      prize_id: e.prize_id || e.prize_id || "",
+      prize_type: e.prize_type || "",
+      prize_value: e.prize_value ?? "",
+      currency: e.currency || "",
+      reason: e.reason || "",
+      message_id: e.message_id || "",
+      channel: e.channel || "",
+      surface: e.surface || "",
+    }));
+
+    const cols = Object.keys(flat[0] || { event_id: "" });
+    download("xenia-eg-raw-events.csv", toCsv(flat, cols), "text/csv");
+  });
+
+  // Populate filter lists
+  renderSelect(els.operator, uniq(allInstances.map(r => r.operator_id)).sort(), "All");
+  renderSelect(els.licensee, uniq(allInstances.map(r => r.licensee_id)).sort(), "All");
+  renderSelect(els.eg, uniq(allInstances.map(r => r.eg_id)).sort(), "All");
+
+  // Auto-set date range to cover sample
+  const qualDates = allInstances.map(r => dateOnly(r.qualified_at)).filter(Boolean).sort();
+  if (qualDates.length) {
+    els.from.value = qualDates[0];
+    els.to.value = qualDates[qualDates.length - 1];
+  }
+
+  // Wire filter changes
+  for (const el of [els.from, els.to, els.operator, els.licensee, els.eg, els.launch, els.retrigger, els.q]) {
+    el.addEventListener("input", refresh);
+    el.addEventListener("change", refresh);
+  }
+
+  els.btnReset.addEventListener("click", resetFilters);
+
+  // Initial render
+  refresh();
+
+</script>
+</body>
+</html>
