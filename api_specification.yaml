@@ -1,0 +1,929 @@
+openapi: 3.0.0
+info:
+  title: Xenia Engagement Games - Reporting API
+  description: API for accessing engagement game reports and analytics
+  version: 1.0.0
+  contact:
+    name: Xenia Platform Team
+    email: platform-team@xenia.com
+
+servers:
+  - url: https://api.xenia.com/v1
+    description: Production server
+  - url: https://api-staging.xenia.com/v1
+    description: Staging server
+
+security:
+  - BearerAuth: []
+
+tags:
+  - name: Reports
+    description: Report generation and retrieval
+  - name: Analytics
+    description: Analytics and aggregated data
+  - name: Export
+    description: Data export functionality
+  - name: Events
+    description: Event ingestion for tracking
+
+paths:
+  # =====================================================
+  # Reports Endpoints
+  # =====================================================
+  
+  /reports/executive-summary:
+    get:
+      tags:
+        - Reports
+      summary: Get executive summary report
+      description: Returns high-level funnel metrics and KPIs
+      parameters:
+        - $ref: '#/components/parameters/StartDate'
+        - $ref: '#/components/parameters/EndDate'
+        - $ref: '#/components/parameters/CampaignId'
+        - $ref: '#/components/parameters/Segment'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExecutiveSummary'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /reports/player-journey:
+    get:
+      tags:
+        - Reports
+      summary: Get detailed player journey report
+      description: Returns detailed player-level journey data
+      parameters:
+        - $ref: '#/components/parameters/StartDate'
+        - $ref: '#/components/parameters/EndDate'
+        - $ref: '#/components/parameters/CampaignId'
+        - $ref: '#/components/parameters/Segment'
+        - $ref: '#/components/parameters/PlayerId'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [all, completed, failed, in_progress]
+          description: Filter by journey status
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlayerJourneyReport'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /reports/failures:
+    get:
+      tags:
+        - Reports
+      summary: Get failure analysis report
+      description: Returns detailed breakdown of failures by stage and reason
+      parameters:
+        - $ref: '#/components/parameters/StartDate'
+        - $ref: '#/components/parameters/EndDate'
+        - $ref: '#/components/parameters/CampaignId'
+        - name: stage
+          in: query
+          schema:
+            type: string
+            enum: [tag_assignment, message_delivery, game_launch, prize_redemption]
+          description: Filter by failure stage
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FailureReport'
+
+  /reports/retriggers:
+    get:
+      tags:
+        - Reports
+      summary: Get retrigger performance report
+      description: Returns analysis of retrigger effectiveness
+      parameters:
+        - $ref: '#/components/parameters/StartDate'
+        - $ref: '#/components/parameters/EndDate'
+        - $ref: '#/components/parameters/CampaignId'
+        - name: retrigger_type
+          in: query
+          schema:
+            type: string
+            enum: [auto_time_30min, auto_time_60min, auto_next_launch, manual_hub]
+          description: Filter by retrigger type
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RetriggerReport'
+
+  /reports/prizes:
+    get:
+      tags:
+        - Reports
+      summary: Get prize performance report
+      description: Returns prize distribution and acceptance rates
+      parameters:
+        - $ref: '#/components/parameters/StartDate'
+        - $ref: '#/components/parameters/EndDate'
+        - $ref: '#/components/parameters/CampaignId'
+        - name: prize_type
+          in: query
+          schema:
+            type: string
+          description: Filter by prize type
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrizeReport'
+
+  /reports/campaigns:
+    get:
+      tags:
+        - Reports
+      summary: Get campaign performance report
+      description: Returns comparative analysis across campaigns
+      parameters:
+        - $ref: '#/components/parameters/StartDate'
+        - $ref: '#/components/parameters/EndDate'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CampaignReport'
+
+  # =====================================================
+  # Analytics Endpoints
+  # =====================================================
+
+  /analytics/funnel:
+    get:
+      tags:
+        - Analytics
+      summary: Get funnel conversion metrics
+      description: Returns conversion rates at each funnel stage
+      parameters:
+        - $ref: '#/components/parameters/StartDate'
+        - $ref: '#/components/parameters/EndDate'
+        - $ref: '#/components/parameters/CampaignId'
+        - $ref: '#/components/parameters/Segment'
+        - name: granularity
+          in: query
+          schema:
+            type: string
+            enum: [hour, day, week, month]
+            default: day
+          description: Time granularity for aggregation
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FunnelAnalytics'
+
+  /analytics/segments:
+    get:
+      tags:
+        - Analytics
+      summary: Get segment performance comparison
+      description: Returns performance metrics broken down by player segment
+      parameters:
+        - $ref: '#/components/parameters/StartDate'
+        - $ref: '#/components/parameters/EndDate'
+        - $ref: '#/components/parameters/CampaignId'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SegmentAnalytics'
+
+  /analytics/technical:
+    get:
+      tags:
+        - Analytics
+      summary: Get technical performance metrics
+      description: Returns system health and performance data (admin only)
+      parameters:
+        - $ref: '#/components/parameters/StartDate'
+        - $ref: '#/components/parameters/EndDate'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TechnicalMetrics'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  # =====================================================
+  # Export Endpoints
+  # =====================================================
+
+  /export/player-journey:
+    post:
+      tags:
+        - Export
+      summary: Export player journey data
+      description: Generate and download player journey data in specified format
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExportRequest'
+      responses:
+        '202':
+          description: Export job created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExportJob'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+
+  /export/jobs/{jobId}:
+    get:
+      tags:
+        - Export
+      summary: Get export job status
+      description: Check the status of an export job
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Export job ID
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExportJob'
+
+  /export/jobs/{jobId}/download:
+    get:
+      tags:
+        - Export
+      summary: Download exported data
+      description: Download the file once export job is complete
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Export job ID
+      responses:
+        '200':
+          description: File download
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+            application/json:
+              schema:
+                type: string
+                format: binary
+
+  # =====================================================
+  # Event Ingestion Endpoints
+  # =====================================================
+
+  /events/track:
+    post:
+      tags:
+        - Events
+      summary: Track engagement game event
+      description: Ingest a single event for tracking
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TrackingEvent'
+      responses:
+        '202':
+          description: Event accepted
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+
+  /events/batch:
+    post:
+      tags:
+        - Events
+      summary: Batch track multiple events
+      description: Ingest multiple events in a single request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                events:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/TrackingEvent'
+                  maxItems: 100
+      responses:
+        '202':
+          description: Events accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accepted:
+                    type: integer
+                  rejected:
+                    type: integer
+                  errors:
+                    type: array
+                    items:
+                      type: object
+
+# =====================================================
+# Components
+# =====================================================
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    StartDate:
+      name: start_date
+      in: query
+      required: true
+      schema:
+        type: string
+        format: date-time
+      description: Start date for report (ISO 8601)
+    
+    EndDate:
+      name: end_date
+      in: query
+      required: true
+      schema:
+        type: string
+        format: date-time
+      description: End date for report (ISO 8601)
+    
+    CampaignId:
+      name: campaign_id
+      in: query
+      schema:
+        type: string
+      description: Filter by campaign ID
+    
+    Segment:
+      name: segment
+      in: query
+      schema:
+        type: string
+        enum: [vip, high_roller, regular, new_player]
+      description: Filter by player segment
+    
+    PlayerId:
+      name: player_id
+      in: query
+      schema:
+        type: string
+      description: Filter by player ID
+    
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+      description: Page number for pagination
+    
+    PageSize:
+      name: page_size
+      in: query
+      schema:
+        type: integer
+        minimum: 10
+        maximum: 1000
+        default: 100
+      description: Number of records per page
+
+  schemas:
+    ExecutiveSummary:
+      type: object
+      properties:
+        date_range:
+          type: object
+          properties:
+            start:
+              type: string
+              format: date-time
+            end:
+              type: string
+              format: date-time
+        metrics:
+          type: object
+          properties:
+            total_qualified:
+              type: integer
+            total_tagged:
+              type: integer
+            total_message_delivered:
+              type: integer
+            total_message_opened:
+              type: integer
+            total_launched:
+              type: integer
+            total_won:
+              type: integer
+            total_accepted:
+              type: integer
+        conversion_rates:
+          type: object
+          properties:
+            qualification_to_tag:
+              type: number
+              format: float
+            tag_to_delivery:
+              type: number
+              format: float
+            delivery_to_open:
+              type: number
+              format: float
+            open_to_launch:
+              type: number
+              format: float
+            launch_to_win:
+              type: number
+              format: float
+            win_to_accept:
+              type: number
+              format: float
+        funnel:
+          type: array
+          items:
+            type: object
+            properties:
+              stage:
+                type: string
+              count:
+                type: integer
+              conversion_rate:
+                type: number
+              drop_off_count:
+                type: integer
+
+    PlayerJourneyReport:
+      type: object
+      properties:
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlayerJourney'
+
+    PlayerJourney:
+      type: object
+      properties:
+        player_id:
+          type: string
+        qualification_timestamp:
+          type: string
+          format: date-time
+        tag_assigned:
+          type: boolean
+        tag_assignment_timestamp:
+          type: string
+          format: date-time
+        tag_failure_reason:
+          type: string
+        message_delivered:
+          type: boolean
+        message_delivery_timestamp:
+          type: string
+          format: date-time
+        message_failure_reason:
+          type: string
+        message_opened:
+          type: boolean
+        message_open_timestamp:
+          type: string
+          format: date-time
+        initial_action:
+          type: string
+          enum: [launched, declined, deferred, no_action]
+        retriggers:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+              timestamp:
+                type: string
+                format: date-time
+              opened:
+                type: boolean
+        game_launch_timestamp:
+          type: string
+          format: date-time
+        game_launch_status:
+          type: string
+          enum: [success, failed]
+        game_launch_failure_reason:
+          type: string
+        game_result:
+          type: string
+          enum: [won, bad_luck]
+        prize:
+          type: object
+          properties:
+            type:
+              type: string
+            value:
+              type: number
+            description:
+              type: string
+        prize_action:
+          type: string
+          enum: [accepted, declined]
+        prize_decline_reason:
+          type: string
+        redemption_status:
+          type: string
+          enum: [success, failed, pending]
+        campaign_id:
+          type: string
+        player_segment:
+          type: string
+        device_type:
+          type: string
+
+    FailureReport:
+      type: object
+      properties:
+        total_failures:
+          type: integer
+        failures_by_stage:
+          type: array
+          items:
+            type: object
+            properties:
+              stage:
+                type: string
+              count:
+                type: integer
+              percentage:
+                type: number
+              top_reasons:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    reason:
+                      type: string
+                    count:
+                      type: integer
+                    percentage:
+                      type: number
+
+    RetriggerReport:
+      type: object
+      properties:
+        total_retriggers:
+          type: integer
+        retriggers_by_type:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+              triggered:
+                type: integer
+              opened:
+                type: integer
+              launched:
+                type: integer
+              launch_rate:
+                type: number
+              avg_time_to_launch:
+                type: string
+        retrigger_attempts_distribution:
+          type: array
+          items:
+            type: object
+            properties:
+              attempts:
+                type: integer
+              players:
+                type: integer
+              success_rate:
+                type: number
+
+    PrizeReport:
+      type: object
+      properties:
+        total_prizes_offered:
+          type: integer
+        total_prizes_won:
+          type: integer
+        total_prizes_accepted:
+          type: integer
+        overall_acceptance_rate:
+          type: number
+        prizes_by_type:
+          type: array
+          items:
+            type: object
+            properties:
+              prize_type:
+                type: string
+              offered:
+                type: integer
+              won:
+                type: integer
+              accepted:
+                type: integer
+              declined:
+                type: integer
+              acceptance_rate:
+                type: number
+              redemption_failures:
+                type: integer
+
+    CampaignReport:
+      type: object
+      properties:
+        campaigns:
+          type: array
+          items:
+            type: object
+            properties:
+              campaign_id:
+                type: string
+              campaign_name:
+                type: string
+              date_range:
+                type: object
+                properties:
+                  start:
+                    type: string
+                    format: date-time
+                  end:
+                    type: string
+                    format: date-time
+              qualified:
+                type: integer
+              launched:
+                type: integer
+              launch_rate:
+                type: number
+              won:
+                type: integer
+              win_rate:
+                type: number
+              accepted:
+                type: integer
+              acceptance_rate:
+                type: number
+
+    FunnelAnalytics:
+      type: object
+      properties:
+        time_series:
+          type: array
+          items:
+            type: object
+            properties:
+              timestamp:
+                type: string
+                format: date-time
+              qualified:
+                type: integer
+              tagged:
+                type: integer
+              delivered:
+                type: integer
+              opened:
+                type: integer
+              launched:
+                type: integer
+              won:
+                type: integer
+              accepted:
+                type: integer
+
+    SegmentAnalytics:
+      type: object
+      properties:
+        segments:
+          type: array
+          items:
+            type: object
+            properties:
+              segment:
+                type: string
+              qualified:
+                type: integer
+              launched:
+                type: integer
+              launch_rate:
+                type: number
+              won:
+                type: integer
+              win_rate:
+                type: number
+              accepted:
+                type: integer
+              acceptance_rate:
+                type: number
+              avg_retriggers:
+                type: number
+
+    TechnicalMetrics:
+      type: object
+      properties:
+        services:
+          type: array
+          items:
+            type: object
+            properties:
+              service:
+                type: string
+              uptime:
+                type: number
+              avg_response_time_ms:
+                type: integer
+              errors:
+                type: integer
+              timeout_rate:
+                type: number
+
+    ExportRequest:
+      type: object
+      required:
+        - start_date
+        - end_date
+        - format
+      properties:
+        start_date:
+          type: string
+          format: date-time
+        end_date:
+          type: string
+          format: date-time
+        campaign_id:
+          type: string
+        segment:
+          type: string
+        format:
+          type: string
+          enum: [csv, json]
+        fields:
+          type: array
+          items:
+            type: string
+          description: Optional list of fields to include in export
+
+    ExportJob:
+      type: object
+      properties:
+        job_id:
+          type: string
+        status:
+          type: string
+          enum: [pending, processing, completed, failed]
+        created_at:
+          type: string
+          format: date-time
+        completed_at:
+          type: string
+          format: date-time
+        download_url:
+          type: string
+        expires_at:
+          type: string
+          format: date-time
+        error_message:
+          type: string
+        record_count:
+          type: integer
+        file_size_bytes:
+          type: integer
+
+    TrackingEvent:
+      type: object
+      required:
+        - event_type
+        - player_id
+        - timestamp
+      properties:
+        event_type:
+          type: string
+          enum:
+            - player_qualified
+            - tag_assigned
+            - message_delivered
+            - message_opened
+            - launch_clicked
+            - launch_declined
+            - launch_deferred
+            - retrigger_sent
+            - retrigger_opened
+            - manual_trigger
+            - game_started
+            - game_completed
+            - prize_won
+            - prize_accepted
+            - prize_declined
+            - error_occurred
+        player_id:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        campaign_id:
+          type: string
+        session_id:
+          type: string
+        metadata:
+          type: object
+          additionalProperties: true
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        page_size:
+          type: integer
+        total_records:
+          type: integer
+        total_pages:
+          type: integer
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        code:
+          type: string
+
+  responses:
+    UnauthorizedError:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    
+    ForbiddenError:
+      description: Insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    
+    BadRequestError:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
