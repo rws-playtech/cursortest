@@ -1,0 +1,82 @@
+[
+  {
+    "event_id": "EV-EXAMPLE-1",
+    "ts": "2025-12-10T10:01:10Z",
+    "source_system": "PJ",
+    "event_type": "qualified",
+    "instance_id": "EG-2025-0001",
+    "player_id": "P-1001",
+    "operator_id": "OP-A",
+    "licensee_id": "LIC-1",
+    "eg_id": "Wheel",
+    "campaign_id": "CAMP-DEC10",
+    "eligibility_rule": "deposit_30d"
+  },
+  {
+    "event_id": "EV-EXAMPLE-2",
+    "ts": "2025-12-10T10:01:12Z",
+    "source_system": "IMS",
+    "event_type": "tag_awarded",
+    "instance_id": "EG-2025-0001",
+    "player_id": "P-1001",
+    "tag": "EG_AVAILABLE"
+  },
+  {
+    "event_id": "EV-EXAMPLE-3",
+    "ts": "2025-12-10T10:01:20Z",
+    "source_system": "IMS",
+    "event_type": "message_served",
+    "instance_id": "EG-2025-0001",
+    "player_id": "P-1001",
+    "message_id": "MSG-9001",
+    "channel": "in-app"
+  },
+  {
+    "event_id": "EV-EXAMPLE-4",
+    "ts": "2025-12-10T10:02:02Z",
+    "source_system": "CLIENT",
+    "event_type": "game_launch_requested",
+    "instance_id": "EG-2025-0001",
+    "player_id": "P-1001",
+    "surface": "message"
+  },
+  {
+    "event_id": "EV-EXAMPLE-5",
+    "ts": "2025-12-10T10:02:04Z",
+    "source_system": "XENIA",
+    "event_type": "game_launch_succeeded",
+    "instance_id": "EG-2025-0001",
+    "player_id": "P-1001",
+    "launch_id": "L-111"
+  },
+  {
+    "event_id": "EV-EXAMPLE-6",
+    "ts": "2025-12-10T10:02:20Z",
+    "source_system": "XENIA",
+    "event_type": "game_result",
+    "instance_id": "EG-2025-0001",
+    "player_id": "P-1001",
+    "result": "WIN",
+    "prize_id": "PR-50FS",
+    "prize_type": "FREE_SPINS",
+    "prize_value": 50
+  },
+  {
+    "event_id": "EV-EXAMPLE-7",
+    "ts": "2025-12-10T10:02:22Z",
+    "source_system": "CLIENT",
+    "event_type": "prize_presented",
+    "instance_id": "EG-2025-0001",
+    "player_id": "P-1001",
+    "prize_id": "PR-50FS"
+  },
+  {
+    "event_id": "EV-EXAMPLE-8",
+    "ts": "2025-12-10T10:02:25Z",
+    "source_system": "CLIENT",
+    "event_type": "prize_accepted",
+    "instance_id": "EG-2025-0001",
+    "player_id": "P-1001",
+    "prize_id": "PR-50FS"
+  }
+]
