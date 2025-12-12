@@ -81,6 +81,31 @@ CREATE TABLE message_open_events (
     INDEX idx_campaign_id (campaign_id)
 );
 
+-- Engagement Game Offer Lifecycle (new "Maybe later" support)
+-- Represents the availability window of an engagement game for a player.
+CREATE TABLE engagement_game_offers (
+    id BIGSERIAL PRIMARY KEY,
+    offer_id VARCHAR(100) NOT NULL, -- stable id shared across systems (Xenia/IMS/EG)
+    player_id VARCHAR(50) NOT NULL,
+    campaign_id VARCHAR(50),
+    offer_created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    offer_expires_at TIMESTAMP WITH TIME ZONE,
+    offer_state VARCHAR(50) NOT NULL, -- available, consumed, lost, expired
+    offer_lost_reason VARCHAR(255), -- declined, expired, superseded, max_retriggers_reached, etc.
+    offer_consumed_at TIMESTAMP WITH TIME ZONE,
+    last_state_change_at TIMESTAMP WITH TIME ZONE,
+    message_id VARCHAR(100), -- IMS message that advertised the offer (if applicable)
+    source_service VARCHAR(100), -- player_journey, ims, xenia, eg_service
+    metadata JSONB,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+
+    INDEX idx_offer_id (offer_id),
+    INDEX idx_player_id (player_id),
+    INDEX idx_campaign_id (campaign_id),
+    INDEX idx_offer_created_at (offer_created_at),
+    INDEX idx_offer_state (offer_state)
+);
+
 -- Player Action Events
 CREATE TABLE player_action_events (
     id BIGSERIAL PRIMARY KEY,
@@ -280,6 +305,33 @@ SELECT
     -- Qualification
     pje.event_timestamp AS qualification_timestamp,
     pje.qualification_source,
+
+    -- Offer Lifecycle (availability window for "Maybe later")
+    (SELECT ego.offer_id
+     FROM engagement_game_offers ego
+     WHERE ego.player_id = pje.player_id AND ego.campaign_id = pje.campaign_id
+     ORDER BY ego.offer_created_at DESC
+     LIMIT 1) AS offer_id,
+    (SELECT ego.offer_state
+     FROM engagement_game_offers ego
+     WHERE ego.player_id = pje.player_id AND ego.campaign_id = pje.campaign_id
+     ORDER BY ego.offer_created_at DESC
+     LIMIT 1) AS offer_state,
+    (SELECT ego.offer_created_at
+     FROM engagement_game_offers ego
+     WHERE ego.player_id = pje.player_id AND ego.campaign_id = pje.campaign_id
+     ORDER BY ego.offer_created_at DESC
+     LIMIT 1) AS offer_created_at,
+    (SELECT ego.offer_expires_at
+     FROM engagement_game_offers ego
+     WHERE ego.player_id = pje.player_id AND ego.campaign_id = pje.campaign_id
+     ORDER BY ego.offer_created_at DESC
+     LIMIT 1) AS offer_expires_at,
+    (SELECT ego.offer_lost_reason
+     FROM engagement_game_offers ego
+     WHERE ego.player_id = pje.player_id AND ego.campaign_id = pje.campaign_id
+     ORDER BY ego.offer_created_at DESC
+     LIMIT 1) AS offer_lost_reason,
     
     -- Tag Assignment
     tae.assignment_timestamp AS tag_assignment_timestamp,
@@ -288,6 +340,7 @@ SELECT
     tae.failure_category AS tag_failure_category,
     
     -- Message Delivery
+    mde.message_id,
     mde.delivery_timestamp AS message_delivery_timestamp,
     mde.delivery_status AS message_delivery_status,
     mde.delivery_failure_reason AS message_delivery_failure_reason,
@@ -312,11 +365,42 @@ SELECT
     FROM retrigger_events re 
     WHERE re.player_id = pje.player_id AND re.campaign_id = pje.campaign_id) AS retriggers,
     
-    -- Game Launch
-    gle.launch_timestamp AS game_launch_timestamp,
-    gle.launch_status AS game_launch_status,
-    gle.launch_failure_reason AS game_launch_failure_reason,
-    gle.launch_failure_category AS game_launch_failure_category,
+    -- Game Launch (last attempt + aggregates)
+    (SELECT COUNT(*) FROM game_launch_events gl
+     WHERE gl.player_id = pje.player_id AND gl.campaign_id = pje.campaign_id) AS game_launch_attempt_count,
+    (SELECT COUNT(*) FROM game_launch_events gl
+     WHERE gl.player_id = pje.player_id AND gl.campaign_id = pje.campaign_id AND gl.launch_status = 'failed') AS game_launch_failure_count,
+    (SELECT CASE
+        WHEN EXISTS (
+          SELECT 1 FROM game_launch_events glf
+          WHERE glf.player_id = pje.player_id AND glf.campaign_id = pje.campaign_id AND glf.launch_status = 'failed'
+        )
+        AND EXISTS (
+          SELECT 1 FROM game_launch_events gls
+          WHERE gls.player_id = pje.player_id AND gls.campaign_id = pje.campaign_id AND gls.launch_status = 'success'
+          AND gls.launch_timestamp > (
+            SELECT MIN(glf2.launch_timestamp) FROM game_launch_events glf2
+            WHERE glf2.player_id = pje.player_id AND glf2.campaign_id = pje.campaign_id AND glf2.launch_status = 'failed'
+          )
+        )
+        THEN TRUE ELSE FALSE
+      END) AS game_launch_recovered_after_failure,
+    (SELECT gl.launch_timestamp FROM game_launch_events gl
+     WHERE gl.player_id = pje.player_id AND gl.campaign_id = pje.campaign_id
+     ORDER BY gl.launch_timestamp DESC
+     LIMIT 1) AS game_launch_timestamp,
+    (SELECT gl.launch_status FROM game_launch_events gl
+     WHERE gl.player_id = pje.player_id AND gl.campaign_id = pje.campaign_id
+     ORDER BY gl.launch_timestamp DESC
+     LIMIT 1) AS game_launch_status,
+    (SELECT gl.launch_failure_reason FROM game_launch_events gl
+     WHERE gl.player_id = pje.player_id AND gl.campaign_id = pje.campaign_id
+     ORDER BY gl.launch_timestamp DESC
+     LIMIT 1) AS game_launch_failure_reason,
+    (SELECT gl.launch_failure_category FROM game_launch_events gl
+     WHERE gl.player_id = pje.player_id AND gl.campaign_id = pje.campaign_id
+     ORDER BY gl.launch_timestamp DESC
+     LIMIT 1) AS game_launch_failure_category,
     
     -- Game Result
     gre.game_result,
@@ -345,7 +429,6 @@ LEFT JOIN tag_assignment_events tae ON pje.player_id = tae.player_id AND pje.cam
 LEFT JOIN message_delivery_events mde ON pje.player_id = mde.player_id AND pje.campaign_id = mde.campaign_id
 LEFT JOIN message_open_events moe ON pje.player_id = moe.player_id AND mde.message_id = moe.message_id
 LEFT JOIN player_action_events pae ON pje.player_id = pae.player_id AND pje.campaign_id = pae.campaign_id AND pae.trigger_type = 'initial'
-LEFT JOIN game_launch_events gle ON pje.player_id = gle.player_id AND pje.campaign_id = gle.campaign_id AND gle.launch_status = 'success'
 LEFT JOIN game_result_events gre ON pje.player_id = gre.player_id AND pje.campaign_id = gre.campaign_id
 LEFT JOIN prize_action_events prae ON pje.player_id = prae.player_id AND pje.campaign_id = prae.campaign_id AND gre.prize_id = prae.prize_id;
 
@@ -364,6 +447,18 @@ SELECT
     COUNT(DISTINCT CASE WHEN tag_assignment_status = 'success' THEN player_id END) AS total_tagged,
     COUNT(DISTINCT CASE WHEN message_delivery_status = 'success' THEN player_id END) AS total_message_delivered,
     COUNT(DISTINCT CASE WHEN message_opened = TRUE THEN player_id END) AS total_message_opened,
+    
+    -- Initial Decision (supports "Maybe later")
+    COUNT(DISTINCT CASE WHEN initial_action = 'launched' THEN player_id END) AS total_launched_immediately,
+    COUNT(DISTINCT CASE WHEN initial_action = 'deferred' THEN player_id END) AS total_deferred,
+    COUNT(DISTINCT CASE WHEN initial_action = 'declined' THEN player_id END) AS total_initial_declined,
+    
+    -- Offer Lifecycle
+    COUNT(DISTINCT CASE WHEN offer_state = 'available' THEN player_id END) AS total_offer_available,
+    COUNT(DISTINCT CASE WHEN offer_state = 'consumed' THEN player_id END) AS total_offer_consumed,
+    COUNT(DISTINCT CASE WHEN offer_state = 'lost' THEN player_id END) AS total_offer_lost,
+    COUNT(DISTINCT CASE WHEN offer_state = 'expired' THEN player_id END) AS total_offer_expired,
+
     COUNT(DISTINCT CASE WHEN game_launch_status = 'success' THEN player_id END) AS total_launched,
     COUNT(DISTINCT CASE WHEN game_result = 'won' THEN player_id END) AS total_won,
     COUNT(DISTINCT CASE WHEN prize_action = 'accepted' THEN player_id END) AS total_accepted,
@@ -372,7 +467,7 @@ SELECT
     -- Failure Counts
     COUNT(DISTINCT CASE WHEN tag_assignment_status = 'failed' THEN player_id END) AS tag_failures,
     COUNT(DISTINCT CASE WHEN message_delivery_status = 'failed' THEN player_id END) AS message_delivery_failures,
-    COUNT(DISTINCT CASE WHEN game_launch_status = 'failed' THEN player_id END) AS game_launch_failures,
+    COUNT(DISTINCT CASE WHEN game_launch_failure_count > 0 THEN player_id END) AS game_launch_failures,
     
     -- Retrigger Stats
     SUM(retrigger_count) AS total_retriggers,
@@ -420,7 +515,7 @@ SELECT
     game_launch_failure_reason AS failure_reason,
     COUNT(*) AS failure_count
 FROM mv_complete_player_journey
-WHERE game_launch_status = 'failed'
+WHERE game_launch_failure_count > 0
 GROUP BY campaign_id, DATE_TRUNC('day', qualification_timestamp), game_launch_failure_category, game_launch_failure_reason
 
 UNION ALL
@@ -434,7 +529,21 @@ SELECT
     COUNT(*) AS failure_count
 FROM mv_complete_player_journey
 WHERE prize_redemption_status = 'failed'
-GROUP BY campaign_id, DATE_TRUNC('day', qualification_timestamp), prize_redemption_failure_reason;
+GROUP BY campaign_id, DATE_TRUNC('day', qualification_timestamp), prize_redemption_failure_reason
+
+-- Offer Lifecycle "failures" (lost/expired availability)
+UNION ALL
+
+SELECT
+    campaign_id,
+    DATE_TRUNC('day', qualification_timestamp) AS report_date,
+    'Offer Lifecycle' AS failure_stage,
+    offer_state AS failure_category,
+    offer_lost_reason AS failure_reason,
+    COUNT(*) AS failure_count
+FROM mv_complete_player_journey
+WHERE offer_state IN ('lost', 'expired')
+GROUP BY campaign_id, DATE_TRUNC('day', qualification_timestamp), offer_state, offer_lost_reason;
 
 CREATE INDEX idx_mv_fa_campaign_id ON mv_failure_analysis(campaign_id);
 CREATE INDEX idx_mv_fa_report_date ON mv_failure_analysis(report_date);
