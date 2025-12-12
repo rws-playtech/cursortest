@@ -372,6 +372,35 @@
             gap: 1.5rem;
         }
 
+        .sub-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .sub-card {
+            background: #f8f9ff;
+            border: 1px solid #e6e9ff;
+            padding: 1rem;
+            border-radius: 8px;
+        }
+
+        .sub-card .label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .sub-card .metric {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-top: 0.25rem;
+            color: #2c3e50;
+        }
+
         .failure-card {
             background: white;
             padding: 1.5rem;
@@ -491,6 +520,22 @@
                 </div>
             </div>
             <div class="kpi-card">
+                <h3>Deferred ("Maybe later")</h3>
+                <div class="value">1,756</div>
+                <div class="change positive">
+                    <span>↑ 5.1%</span>
+                    <span>vs last week</span>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <h3>Launch Failures</h3>
+                <div class="value">178</div>
+                <div class="change negative">
+                    <span>↓ 0.4%</span>
+                    <span>vs last week</span>
+                </div>
+            </div>
+            <div class="kpi-card">
                 <h3>Launch Rate</h3>
                 <div class="value">58.3%</div>
                 <div class="change positive">
@@ -562,6 +607,25 @@
                     </div>
                 </div>
             </div>
+
+            <div class="sub-grid" aria-label="Initial decision breakdown">
+                <div class="sub-card">
+                    <div class="label">Launched immediately</div>
+                    <div class="metric">9,234</div>
+                </div>
+                <div class="sub-card">
+                    <div class="label">Deferred ("Maybe later")</div>
+                    <div class="metric">1,756</div>
+                </div>
+                <div class="sub-card">
+                    <div class="label">Declined ("No thanks")</div>
+                    <div class="metric">400</div>
+                </div>
+                <div class="sub-card">
+                    <div class="label">No action</div>
+                    <div class="metric">744</div>
+                </div>
+            </div>
         </div>
 
         <!-- Tabs -->
@@ -593,112 +657,145 @@
                     <tr>
                         <th>Player ID</th>
                         <th>Date</th>
+                        <th>Offer State</th>
                         <th>Status</th>
                         <th>Initial Action</th>
-                        <th>Retriggers</th>
+                        <th>Follow-up</th>
+                        <th>Launch</th>
                         <th>Result</th>
                         <th>Prize</th>
                         <th>Action</th>
+                        <th>Failure</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
                         <td>PLR-10001</td>
                         <td>Dec 10, 14:23</td>
+                        <td>Consumed</td>
                         <td><span class="status-badge status-success">Completed</span></td>
                         <td>Launched</td>
-                        <td>0</td>
+                        <td>-</td>
+                        <td>1 attempt · Success</td>
                         <td>Won</td>
                         <td>10 Free Spins</td>
                         <td>Accepted</td>
+                        <td>-</td>
                     </tr>
                     <tr>
                         <td>PLR-10002</td>
                         <td>Dec 10, 15:45</td>
+                        <td>Consumed</td>
                         <td><span class="status-badge status-success">Completed</span></td>
-                        <td>Declined</td>
-                        <td>1 (Auto)</td>
+                        <td>Deferred</td>
+                        <td>Auto re-trigger (30m)</td>
+                        <td>1 attempt · Success</td>
                         <td>Won</td>
                         <td>$5 Bonus</td>
                         <td>Accepted</td>
+                        <td>-</td>
                     </tr>
                     <tr>
                         <td>PLR-10003</td>
                         <td>Dec 10, 16:12</td>
+                        <td>Consumed</td>
                         <td><span class="status-badge status-success">Completed</span></td>
-                        <td>Declined</td>
-                        <td>1 (Auto)</td>
+                        <td>Deferred</td>
+                        <td>Auto re-trigger (next launch)</td>
+                        <td>1 attempt · Success</td>
                         <td>Bad Luck</td>
+                        <td>-</td>
                         <td>-</td>
                         <td>-</td>
                     </tr>
                     <tr>
                         <td>PLR-10004</td>
                         <td>Dec 10, 17:30</td>
+                        <td>Available</td>
                         <td><span class="status-badge status-failed">Failed</span></td>
                         <td>No Action</td>
-                        <td>0</td>
+                        <td>Auto scheduled (next launch)</td>
+                        <td>0 attempts</td>
                         <td>-</td>
                         <td>-</td>
                         <td>-</td>
+                        <td>Message not opened (offline)</td>
                     </tr>
                     <tr>
                         <td>PLR-10005</td>
                         <td>Dec 10, 18:22</td>
+                        <td>Unknown</td>
                         <td><span class="status-badge status-failed">Failed</span></td>
                         <td>-</td>
-                        <td>0</td>
+                        <td>-</td>
+                        <td>0 attempts</td>
                         <td>-</td>
                         <td>-</td>
                         <td>-</td>
+                        <td>IMS timeout (delivery)</td>
                     </tr>
                     <tr>
                         <td>PLR-10006</td>
                         <td>Dec 10, 19:05</td>
+                        <td>Consumed</td>
                         <td><span class="status-badge status-success">Completed</span></td>
                         <td>Launched</td>
-                        <td>0</td>
+                        <td>-</td>
+                        <td>1 attempt · Success</td>
                         <td>Won</td>
                         <td>20 Free Spins</td>
                         <td>Declined</td>
+                        <td>-</td>
                     </tr>
                     <tr>
                         <td>PLR-10007</td>
                         <td>Dec 10, 20:15</td>
+                        <td>Not Created</td>
                         <td><span class="status-badge status-failed">Failed</span></td>
                         <td>-</td>
-                        <td>0</td>
+                        <td>-</td>
+                        <td>0 attempts</td>
                         <td>-</td>
                         <td>-</td>
                         <td>-</td>
+                        <td>Tag assignment failed (duplicate)</td>
                     </tr>
                     <tr>
                         <td>PLR-10008</td>
                         <td>Dec 11, 08:30</td>
+                        <td>Consumed</td>
                         <td><span class="status-badge status-success">Completed</span></td>
-                        <td>Declined</td>
-                        <td>1 (Manual)</td>
+                        <td>Deferred</td>
+                        <td>Manual trigger (Engagement Hub)</td>
+                        <td>1 attempt · Success</td>
                         <td>Won</td>
                         <td>$10 Bonus</td>
                         <td>Accepted</td>
+                        <td>-</td>
                     </tr>
                     <tr>
                         <td>PLR-10009</td>
                         <td>Dec 11, 09:12</td>
-                        <td><span class="status-badge status-failed">Failed</span></td>
+                        <td>Consumed</td>
+                        <td><span class="status-badge status-success">Completed</span></td>
                         <td>Launched</td>
-                        <td>0</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>-</td>
+                        <td>Auto follow-up (after launch failure)</td>
+                        <td>2 attempts · Success</td>
+                        <td>Won</td>
+                        <td>10 Free Spins</td>
+                        <td>Accepted</td>
+                        <td>EG service unavailable (attempt 1)</td>
                     </tr>
                     <tr>
                         <td>PLR-10010</td>
                         <td>Dec 11, 10:45</td>
-                        <td><span class="status-badge status-success">Completed</span></td>
-                        <td>Declined</td>
-                        <td>2 (Auto)</td>
-                        <td>Bad Luck</td>
+                        <td>Available</td>
+                        <td><span class="status-badge status-pending">In Progress</span></td>
+                        <td>Deferred</td>
+                        <td>Auto re-trigger (30m) x2</td>
+                        <td>0 attempts</td>
+                        <td>-</td>
+                        <td>-</td>
                         <td>-</td>
                         <td>-</td>
                     </tr>
@@ -778,6 +875,22 @@
                     <div class="failure-item">
                         <span class="failure-reason">Account Limitation</span>
                         <span class="failure-count">9 (10%)</span>
+                    </div>
+                </div>
+
+                <div class="failure-card">
+                    <h3>Offer Lifecycle (Lost/Expired)</h3>
+                    <div class="failure-item">
+                        <span class="failure-reason">Player declined ("No thanks")</span>
+                        <span class="failure-count">400</span>
+                    </div>
+                    <div class="failure-item">
+                        <span class="failure-reason">Offer expired (unclaimed)</span>
+                        <span class="failure-count">—</span>
+                    </div>
+                    <div class="failure-item">
+                        <span class="failure-reason">Max retriggers reached</span>
+                        <span class="failure-count">—</span>
                     </div>
                 </div>
             </div>

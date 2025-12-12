@@ -464,8 +464,29 @@ components:
               type: integer
             total_message_opened:
               type: integer
+            total_deferred:
+              type: integer
+              description: Players who selected "Maybe later" at initial prompt
+            total_initial_declined:
+              type: integer
+              description: Players who declined ("No thanks") at initial prompt (offer lost)
+            total_offer_available:
+              type: integer
+              description: Offers currently available (not yet consumed/lost/expired)
+            total_offer_lost:
+              type: integer
+              description: Offers lost (e.g., player declined)
+            total_offer_expired:
+              type: integer
+              description: Offers expired without being consumed
             total_launched:
               type: integer
+            total_launch_failures:
+              type: integer
+              description: Count of failed game launch attempts
+            total_launch_recovered_after_failure:
+              type: integer
+              description: Players who experienced a launch failure and later launched successfully
             total_won:
               type: integer
             total_accepted:
@@ -523,12 +544,28 @@ components:
         qualification_timestamp:
           type: string
           format: date-time
+        offer_id:
+          type: string
+          description: Engagement game offer/availability identifier
+        offer_state:
+          type: string
+          enum: [available, consumed, lost, expired, unknown]
+        offer_created_at:
+          type: string
+          format: date-time
+        offer_expires_at:
+          type: string
+          format: date-time
+        offer_lost_reason:
+          type: string
         tag_assigned:
           type: boolean
         tag_assignment_timestamp:
           type: string
           format: date-time
         tag_failure_reason:
+          type: string
+        message_id:
           type: string
         message_delivered:
           type: boolean
@@ -557,6 +594,7 @@ components:
                 format: date-time
               opened:
                 type: boolean
+              additionalProperties: true
         game_launch_timestamp:
           type: string
           format: date-time
@@ -565,6 +603,34 @@ components:
           enum: [success, failed]
         game_launch_failure_reason:
           type: string
+        game_launch_attempt_count:
+          type: integer
+        game_launch_failure_count:
+          type: integer
+        game_launch_recovered_after_failure:
+          type: boolean
+        game_launch_attempts:
+          type: array
+          description: Optional list of launch attempts (for drilldown)
+          items:
+            type: object
+            properties:
+              attempt:
+                type: integer
+              timestamp:
+                type: string
+                format: date-time
+              status:
+                type: string
+                enum: [success, failed]
+              failure_reason:
+                type: string
+              initiated_by:
+                type: string
+                enum: [player, system]
+              source:
+                type: string
+                description: engagement_message, engagement_hub, retrigger_message, etc.
         game_result:
           type: string
           enum: [won, bad_luck]

@@ -53,12 +53,13 @@ The system tracks every step of the engagement game journey:
 2. **Tag Assignment** - Success/failure of tagging (from Xenia)
 3. **Message Delivery** - Success/failure of message delivery (from IMS)
 4. **Message Open** - Player engagement with the message
-5. **Initial Action** - Launch, decline, defer, or no action
-6. **Re-triggers** - Automatic or manual re-engagement attempts
-7. **Game Launch** - Success/failure of game initialization
-8. **Game Result** - Win or bad luck outcome
-9. **Prize Action** - Accept or decline prize
-10. **Prize Redemption** - Success/failure of prize delivery
+5. **Offer Lifecycle** - Offer availability state (available/consumed/lost/expired) to support "Maybe later"
+6. **Initial Action** - Launch, decline, defer, or no action
+7. **Re-triggers** - Automatic or manual re-engagement attempts (including follow-ups after launch failures)
+8. **Game Launch** - Success/failure of game initialization (with recovery tracking)
+9. **Game Result** - Win or bad luck outcome
+10. **Prize Action** - Accept or decline prize
+11. **Prize Redemption** - Success/failure of prize delivery
 
 ### Failure Analysis
 Detailed tracking of failures at each stage:

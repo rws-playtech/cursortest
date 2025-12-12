@@ -11,7 +11,9 @@ This prototype demonstrates the comprehensive reporting structure for Engagement
 
 **Date Range:** Dec 1, 2025 - Dec 12, 2025  
 **Total Qualified Users:** 15,847  
-**Total Games Launched:** 9,234 (58.3%)  
+**Total Games Launched (Successful):** 9,234 (58.3%)  
+**Total Game Launch Failures:** 178 (1.9% of attempted launches)  
+**Launches Recovered After Failure:** 64 (35.9% of launch failures)  
 **Total Prizes Won:** 4,512 (48.9% of launches)  
 **Total Prizes Accepted:** 3,891 (86.2% of wins)
 
@@ -25,15 +27,17 @@ Message Delivered            15,401  ( 98.6%)  ❌ 222 failed
   ↓
 Message Opened               12,134  ( 78.8%)
   ↓
-Game Launched (First Try)     9,234  ( 76.1%)
-  ├─ Declined Initially       2,156  ( 17.8%)
-  └─ No Action               744   (  6.1%)
+Initial Player Decision       12,134  (100.0% of opened)
+  ├─ Launched Immediately      9,234  ( 76.1%)
+  ├─ Deferred ("Maybe later")  1,756  ( 14.5%)
+  ├─ Declined ("No thanks")      400  (  3.3%)  (offer lost)
+  └─ No Action                  744  (  6.1%)
   ↓
-Re-triggered (from declines)  1,823  ( 84.5% of declines)
-  ├─ Manual (Engagement Hub)   412  ( 22.6%)
-  └─ Automatic Re-trigger    1,411  ( 77.4%)
+Offer Still Available*         1,756  (100.0% of deferred)
+  ├─ Manual Trigger (Hub)        412  ( 23.5%)
+  └─ Automatic Re-trigger      1,344  ( 76.5%)
   ↓
-Game Launched (After Retry)   1,089  ( 59.7% of re-triggers)
+Game Launched (After Defer)    1,089  ( 62.0% of deferred)
   ↓
 Total Game Completions        9,234  (100.0%)
   ├─ Prize Won                4,512  ( 48.9%)
@@ -41,6 +45,9 @@ Total Game Completions        9,234  (100.0%)
   ↓
 Prize Accepted                3,891  ( 86.2% of wins)
 Prize Declined                  621  ( 13.8% of wins)
+
+*Offer Still Available is the new-state lifecycle enabled by "Maybe later".
+In the legacy setup, "Declined" would typically imply offer is lost permanently.
 ```
 
 ---
@@ -49,18 +56,18 @@ Prize Declined                  621  ( 13.8% of wins)
 
 ### Sample Data Table
 
-| Player ID | Qualification Date | Tag Assigned | Message Delivered | Message Opened | Initial Action | Re-trigger Type | Re-trigger Count | Game Launch Date | Game Result | Prize Type | Prize Action | Failure Point | Failure Reason |
-|-----------|-------------------|--------------|-------------------|----------------|----------------|-----------------|------------------|------------------|-------------|------------|--------------|---------------|----------------|
-| PLR-10001 | 2025-12-10 14:23 | ✅ | ✅ | ✅ | Launched | - | 0 | 2025-12-10 14:25 | Won | 10 Free Spins | Accepted | - | - |
-| PLR-10002 | 2025-12-10 15:45 | ✅ | ✅ | ✅ | Declined | Auto (30min) | 1 | 2025-12-10 16:18 | Won | $5 Bonus | Accepted | - | - |
-| PLR-10003 | 2025-12-10 16:12 | ✅ | ✅ | ✅ | Declined | Auto (next launch) | 1 | 2025-12-11 09:45 | Bad Luck | - | - | - | - |
-| PLR-10004 | 2025-12-10 17:30 | ✅ | ✅ | ❌ | No Action | - | 0 | - | - | - | - | Message Open | Player offline for 24h |
-| PLR-10005 | 2025-12-10 18:22 | ✅ | ❌ | ❌ | - | - | 0 | - | - | - | - | Message Delivery | IMS service timeout |
-| PLR-10006 | 2025-12-10 19:05 | ✅ | ✅ | ✅ | Launched | - | 0 | 2025-12-10 19:07 | Won | 20 Free Spins | Declined | - | - |
-| PLR-10007 | 2025-12-10 20:15 | ❌ | ❌ | ❌ | - | - | 0 | - | - | - | - | Tag Assignment | Player ineligible: duplicate tag |
-| PLR-10008 | 2025-12-11 08:30 | ✅ | ✅ | ✅ | Declined | Manual (Eng. Hub) | 1 | 2025-12-11 14:22 | Won | $10 Bonus | Accepted | - | - |
-| PLR-10009 | 2025-12-11 09:12 | ✅ | ✅ | ✅ | Launched | - | 0 | 2025-12-11 09:14 | - | - | - | Game Launch | EG service unavailable |
-| PLR-10010 | 2025-12-11 10:45 | ✅ | ✅ | ✅ | Declined | Auto (30min) | 2 | 2025-12-11 11:51 | Bad Luck | - | - | - | - |
+| Player ID | Qualification Date | Offer State | Tag Assigned | Message Delivered | Message Opened | Initial Action | Follow-up / Re-trigger | Launch Attempts | Last Launch Status | Last Launch Date | Game Result | Prize Type | Prize Action | Failure Point | Failure Reason |
+|-----------|-------------------|------------|--------------|-------------------|----------------|----------------|------------------------|----------------|------------------|----------------|-------------|------------|--------------|---------------|----------------|
+| PLR-10001 | 2025-12-10 14:23 | Consumed | ✅ | ✅ | ✅ | Launched | - | 1 | Success | 2025-12-10 14:25 | Won | 10 Free Spins | Accepted | - | - |
+| PLR-10002 | 2025-12-10 15:45 | Consumed | ✅ | ✅ | ✅ | Deferred | Auto re-trigger (30m) → launched | 1 | Success | 2025-12-10 16:18 | Won | $5 Bonus | Accepted | - | - |
+| PLR-10003 | 2025-12-10 16:12 | Consumed | ✅ | ✅ | ✅ | Deferred | Auto (next launch) → launched | 1 | Success | 2025-12-11 09:45 | Bad Luck | - | - | - | - |
+| PLR-10004 | 2025-12-10 17:30 | Available | ✅ | ✅ | ❌ | No Action | Auto re-trigger scheduled (next launch) | 0 | - | - | - | - | - | Message Open | Player offline for 24h |
+| PLR-10005 | 2025-12-10 18:22 | Unknown | ✅ | ❌ | ❌ | - | - | 0 | - | - | - | - | - | Message Delivery | IMS service timeout |
+| PLR-10006 | 2025-12-10 19:05 | Consumed | ✅ | ✅ | ✅ | Launched | - | 1 | Success | 2025-12-10 19:07 | Won | 20 Free Spins | Declined | - | - |
+| PLR-10007 | 2025-12-10 20:15 | Not Created | ❌ | ❌ | ❌ | - | - | 0 | - | - | - | - | - | Tag Assignment | Player ineligible: duplicate tag |
+| PLR-10008 | 2025-12-11 08:30 | Consumed | ✅ | ✅ | ✅ | Deferred | Manual trigger (Engagement Hub) → launched | 1 | Success | 2025-12-11 14:22 | Won | $10 Bonus | Accepted | - | - |
+| PLR-10009 | 2025-12-11 09:12 | Consumed | ✅ | ✅ | ✅ | Launched | Auto re-trigger after launch failure (30m) | 2 | Success | 2025-12-11 09:52 | Won | 10 Free Spins | Accepted | Game Launch | EG service unavailable (attempt 1) |
+| PLR-10010 | 2025-12-11 10:45 | Available | ✅ | ✅ | ✅ | Deferred | Auto (30m) attempted (x2), not launched yet | 0 | - | - | - | - | - | - | - |
 
 ---
 
@@ -75,6 +82,7 @@ Prize Declined                  621  ( 13.8% of wins)
 | Message Open | 3,267 | 21.2% | Player offline for 24h+ (67%), Message expired (33%) |
 | Game Launch | 178 | 1.9% | EG service unavailable (42%), Client connectivity (38%), Invalid game config (20%) |
 | Prize Redemption | 89 | 2.0% | Prize service timeout (56%), Inventory unavailable (34%), Account limitation (10%) |
+| Offer Lifecycle | 400 | 2.5% | Player declined (offer lost), Offer expired, Max retriggers reached |
 
 ### Detailed Failure Reasons
 
@@ -197,9 +205,9 @@ Prize Declined                  621  ( 13.8% of wins)
 ### CSV Export Format
 
 ```csv
-player_id,qualification_timestamp,qualification_source,tag_assigned,tag_assignment_timestamp,tag_assignment_status,tag_failure_reason,message_delivered,message_delivery_timestamp,message_delivery_status,message_failure_reason,message_opened,message_open_timestamp,initial_action,initial_action_timestamp,retrigger_1_type,retrigger_1_timestamp,retrigger_1_opened,retrigger_2_type,retrigger_2_timestamp,retrigger_2_opened,retrigger_3_type,retrigger_3_timestamp,retrigger_3_opened,total_retriggers,final_launch_timestamp,game_launch_status,game_launch_failure_reason,game_result,prize_type,prize_value,prize_action,prize_action_timestamp,prize_decline_reason,redemption_status,redemption_failure_reason,campaign_id,campaign_name,player_segment,device_type,session_id
-PLR-10001,2025-12-10T14:23:45Z,player_journey,true,2025-12-10T14:23:46Z,success,,true,2025-12-10T14:23:47Z,success,,true,2025-12-10T14:24:12Z,launched,2025-12-10T14:25:03Z,,,,,,,,,,0,2025-12-10T14:25:03Z,success,,won,free_spins,10,accepted,2025-12-10T14:25:34Z,,success,,EG-2025-001,Christmas Wheel,regular,mobile,sess_abc123
-PLR-10002,2025-12-10T15:45:22Z,player_journey,true,2025-12-10T15:45:23Z,success,,true,2025-12-10T15:45:24Z,success,,true,2025-12-10T15:46:01Z,declined,2025-12-10T15:46:15Z,auto_time_30min,2025-12-10T16:16:15Z,true,,,,,,,1,2025-12-10T16:18:42Z,success,,won,bonus_cash,5,accepted,2025-12-10T16:19:08Z,,success,,EG-2025-002,Welcome Bonus Game,new_player,desktop,sess_def456
+player_id,qualification_timestamp,qualification_source,offer_id,offer_state,offer_created_at,offer_expires_at,offer_lost_reason,tag_assigned,tag_assignment_timestamp,tag_assignment_status,tag_failure_reason,message_id,message_delivered,message_delivery_timestamp,message_delivery_status,message_failure_reason,message_opened,message_open_timestamp,initial_action,initial_action_timestamp,follow_up_method,total_retriggers,last_retrigger_type,last_retrigger_timestamp,launch_attempts,last_launch_timestamp,last_launch_status,last_launch_failure_reason,game_result,prize_type,prize_value,prize_action,prize_action_timestamp,prize_decline_reason,redemption_status,redemption_failure_reason,campaign_id,campaign_name,player_segment,device_type,session_id
+PLR-10001,2025-12-10T14:23:45Z,player_journey,off_001,consumed,2025-12-10T14:23:47Z,2025-12-11T14:23:47Z,,true,2025-12-10T14:23:46Z,success,,msg_001,true,2025-12-10T14:23:47Z,success,,true,2025-12-10T14:24:12Z,launched,2025-12-10T14:25:03Z,,0,,,1,2025-12-10T14:25:03Z,success,,won,free_spins,10,accepted,2025-12-10T14:25:34Z,,success,,EG-2025-001,Christmas Wheel,regular,mobile,sess_abc123
+PLR-10002,2025-12-10T15:45:22Z,player_journey,off_002,consumed,2025-12-10T15:45:24Z,2025-12-11T15:45:24Z,,true,2025-12-10T15:45:23Z,success,,msg_002,true,2025-12-10T15:45:24Z,success,,true,2025-12-10T15:46:01Z,deferred,2025-12-10T15:46:15Z,auto_time_30min,1,auto_time_30min,2025-12-10T16:16:15Z,1,2025-12-10T16:18:42Z,success,,won,bonus_cash,5,accepted,2025-12-10T16:19:08Z,,success,,EG-2025-002,Welcome Bonus Game,new_player,desktop,sess_def456
 ```
 
 ### JSON Export Format
@@ -222,6 +230,11 @@ PLR-10002,2025-12-10T15:45:22Z,player_journey,true,2025-12-10T15:45:23Z,success,
     "total_message_delivered": 15401,
     "total_message_opened": 12134,
     "total_launched": 9234,
+    "total_deferred": 1756,
+    "total_declined": 400,
+    "total_offer_still_available": 1756,
+    "total_launch_failures": 178,
+    "total_launch_recovered_after_failure": 64,
     "total_won": 4512,
     "total_accepted": 3891,
     "conversion_rate": 58.3,
@@ -240,6 +253,13 @@ PLR-10002,2025-12-10T15:45:22Z,player_journey,true,2025-12-10T15:45:23Z,success,
           "timestamp": "2025-12-10T14:23:45Z",
           "source": "player_journey"
         },
+        "offer": {
+          "id": "off_001",
+          "state": "consumed",
+          "created_at": "2025-12-10T14:23:47Z",
+          "expires_at": "2025-12-11T14:23:47Z",
+          "lost_reason": null
+        },
         "tag_assignment": {
           "assigned": true,
           "timestamp": "2025-12-10T14:23:46Z",
@@ -247,6 +267,7 @@ PLR-10002,2025-12-10T15:45:22Z,player_journey,true,2025-12-10T15:45:23Z,success,
           "failure_reason": null
         },
         "message": {
+          "id": "msg_001",
           "delivered": true,
           "delivery_timestamp": "2025-12-10T14:23:47Z",
           "delivery_status": "success",
@@ -259,11 +280,16 @@ PLR-10002,2025-12-10T15:45:22Z,player_journey,true,2025-12-10T15:45:23Z,success,
           "timestamp": "2025-12-10T14:25:03Z"
         },
         "retriggers": [],
-        "game_launch": {
-          "timestamp": "2025-12-10T14:25:03Z",
-          "status": "success",
-          "failure_reason": null
-        },
+        "game_launch_attempts": [
+          {
+            "attempt": 1,
+            "timestamp": "2025-12-10T14:25:03Z",
+            "status": "success",
+            "failure_reason": null,
+            "initiated_by": "player",
+            "source": "engagement_message"
+          }
+        ],
         "game_result": {
           "result": "won",
           "prize": {
