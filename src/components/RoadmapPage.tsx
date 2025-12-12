@@ -21,7 +21,7 @@ export default function RoadmapPage() {
   const categories = ['all', ...Array.from(new Set(mockGames.map(g => g.category).filter((c): c is string => c !== undefined)))];
   const studios = ['all', ...Array.from(new Set(mockGames.map(g => g.studio).filter((s): s is string => s !== undefined)))];
   const themes = ['all', ...Array.from(new Set(mockGames.map(g => g.theme).filter((t): t is string => t !== undefined)))];
-  const volatilities: string[] = ['all', ...Array.from(new Set(mockGames.map(g => g.volatility).filter(v => v !== undefined)))];
+  const volatilities = ['all', '1', '2', '3', '4', '5'];
   const allFeatures = Array.from(new Set(mockGames.flatMap(g => g.features || []))).sort();
   const features = ['all', ...allFeatures];
 
@@ -37,7 +37,7 @@ export default function RoadmapPage() {
       case 'theme':
         return mockGames.filter(g => g.theme === value).length;
       case 'volatility':
-        return mockGames.filter(g => g.volatility === value).length;
+        return mockGames.filter(g => g.volatility?.toString() === value).length;
       case 'feature':
         return mockGames.filter(g => g.features?.includes(value)).length;
       default:
@@ -50,7 +50,7 @@ export default function RoadmapPage() {
     if (filterCategory !== 'all' && game.category !== filterCategory) return false;
     if (filterStudio !== 'all' && game.studio !== filterStudio) return false;
     if (filterTheme !== 'all' && game.theme !== filterTheme) return false;
-    if (filterVolatility !== 'all' && game.volatility !== filterVolatility) return false;
+    if (filterVolatility !== 'all' && game.volatility?.toString() !== filterVolatility) return false;
     if (filterFeature !== 'all' && !game.features?.includes(filterFeature)) return false;
     return true;
   });
@@ -146,97 +146,87 @@ export default function RoadmapPage() {
             <div className={styles.filtersContainer}>
               {/* Category Filter */}
               <div className={styles.filterGroup}>
-                <label className={styles.filterLabel}>Category:</label>
-                <div className={styles.filterButtons}>
+                <label className={styles.filterLabel} htmlFor="category-filter">Category:</label>
+                <select
+                  id="category-filter"
+                  className={styles.filterSelect}
+                  value={filterCategory}
+                  onChange={(e) => setFilterCategory(e.target.value)}
+                >
                   {categories.map(category => (
-                    <button
-                      key={category}
-                      className={`${styles.filterButton} ${
-                        filterCategory === category ? styles.filterButtonActive : ''
-                      }`}
-                      onClick={() => setFilterCategory(category)}
-                    >
-                      {category === 'all' ? 'All Games' : category}
-                      <span className={styles.filterCount}>{getFilterCount('category', category)}</span>
-                    </button>
+                    <option key={category} value={category}>
+                      {category === 'all' ? 'All Games' : category} ({getFilterCount('category', category)})
+                    </option>
                   ))}
-                </div>
+                </select>
               </div>
 
               {/* Studio Filter */}
               <div className={styles.filterGroup}>
-                <label className={styles.filterLabel}>Studio:</label>
-                <div className={styles.filterButtons}>
+                <label className={styles.filterLabel} htmlFor="studio-filter">Studio:</label>
+                <select
+                  id="studio-filter"
+                  className={styles.filterSelect}
+                  value={filterStudio}
+                  onChange={(e) => setFilterStudio(e.target.value)}
+                >
                   {studios.map(studio => (
-                    <button
-                      key={studio}
-                      className={`${styles.filterButton} ${
-                        filterStudio === studio ? styles.filterButtonActive : ''
-                      }`}
-                      onClick={() => setFilterStudio(studio)}
-                    >
-                      {studio === 'all' ? 'All Studios' : studio}
-                      <span className={styles.filterCount}>{getFilterCount('studio', studio)}</span>
-                    </button>
+                    <option key={studio} value={studio}>
+                      {studio === 'all' ? 'All Studios' : studio} ({getFilterCount('studio', studio)})
+                    </option>
                   ))}
-                </div>
+                </select>
               </div>
 
               {/* Theme Filter */}
               <div className={styles.filterGroup}>
-                <label className={styles.filterLabel}>Theme:</label>
-                <div className={styles.filterButtons}>
+                <label className={styles.filterLabel} htmlFor="theme-filter">Theme:</label>
+                <select
+                  id="theme-filter"
+                  className={styles.filterSelect}
+                  value={filterTheme}
+                  onChange={(e) => setFilterTheme(e.target.value)}
+                >
                   {themes.map(theme => (
-                    <button
-                      key={theme}
-                      className={`${styles.filterButton} ${
-                        filterTheme === theme ? styles.filterButtonActive : ''
-                      }`}
-                      onClick={() => setFilterTheme(theme)}
-                    >
-                      {theme === 'all' ? 'All Themes' : theme}
-                      <span className={styles.filterCount}>{getFilterCount('theme', theme)}</span>
-                    </button>
+                    <option key={theme} value={theme}>
+                      {theme === 'all' ? 'All Themes' : theme} ({getFilterCount('theme', theme)})
+                    </option>
                   ))}
-                </div>
+                </select>
               </div>
 
               {/* Volatility Filter */}
               <div className={styles.filterGroup}>
-                <label className={styles.filterLabel}>Volatility:</label>
-                <div className={styles.filterButtons}>
+                <label className={styles.filterLabel} htmlFor="volatility-filter">Volatility:</label>
+                <select
+                  id="volatility-filter"
+                  className={styles.filterSelect}
+                  value={filterVolatility}
+                  onChange={(e) => setFilterVolatility(e.target.value)}
+                >
                   {volatilities.map(volatility => (
-                    <button
-                      key={volatility}
-                      className={`${styles.filterButton} ${
-                        filterVolatility === volatility ? styles.filterButtonActive : ''
-                      }`}
-                      onClick={() => setFilterVolatility(volatility || 'all')}
-                    >
-                      {volatility === 'all' ? 'All Levels' : (volatility || 'Unknown')}
-                      <span className={styles.filterCount}>{getFilterCount('volatility', volatility || 'all')}</span>
-                    </button>
+                    <option key={volatility} value={volatility}>
+                      {volatility === 'all' ? 'All Levels' : `${volatility}/5`} ({getFilterCount('volatility', volatility)})
+                    </option>
                   ))}
-                </div>
+                </select>
               </div>
 
               {/* Feature Filter */}
               <div className={styles.filterGroup}>
-                <label className={styles.filterLabel}>Feature:</label>
-                <div className={styles.filterButtons}>
+                <label className={styles.filterLabel} htmlFor="feature-filter">Feature:</label>
+                <select
+                  id="feature-filter"
+                  className={styles.filterSelect}
+                  value={filterFeature}
+                  onChange={(e) => setFilterFeature(e.target.value)}
+                >
                   {features.map(feature => (
-                    <button
-                      key={feature}
-                      className={`${styles.filterButton} ${
-                        filterFeature === feature ? styles.filterButtonActive : ''
-                      }`}
-                      onClick={() => setFilterFeature(feature)}
-                    >
-                      {feature === 'all' ? 'All Features' : feature}
-                      <span className={styles.filterCount}>{getFilterCount('feature', feature)}</span>
-                    </button>
+                    <option key={feature} value={feature}>
+                      {feature === 'all' ? 'All Features' : feature} ({getFilterCount('feature', feature)})
+                    </option>
                   ))}
-                </div>
+                </select>
               </div>
 
               {/* Clear Filters Button */}

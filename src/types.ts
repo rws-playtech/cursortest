@@ -28,7 +28,7 @@ export interface Game {
   provider?: string;
   studio?: string; // Development studio
   theme?: string; // Game theme
-  volatility?: 'Low' | 'Medium' | 'High' | 'Very High';
+  volatility?: 1 | 2 | 3 | 4 | 5; // 1=Very Low, 2=Low, 3=Medium, 4=High, 5=Very High
   baseCost?: number; // Base cost in currency
   maxWinMultiplier?: number; // Maximum win as multiplier of total bet (e.g., 5000x)
   jackpot?: JackpotInfo;

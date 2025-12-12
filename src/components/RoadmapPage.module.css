@@ -59,74 +59,61 @@
 .controls {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-lg);
-  padding: var(--spacing-xl);
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
   background: var(--color-surface);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
 }
 
 .filtersContainer {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-lg);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-md);
+  align-items: end;
 }
 
 .filterGroup {
   display: flex;
-  align-items: start;
-  gap: var(--spacing-md);
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: var(--spacing-xs);
 }
 
 .filterLabel {
   font-size: 0.875rem;
   font-weight: 600;
   color: var(--color-text-secondary);
-  white-space: nowrap;
-  min-width: 80px;
-  padding-top: var(--spacing-sm);
 }
 
-.filterButtons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--spacing-sm);
-}
-
-.filterButton {
+.filterSelect {
   padding: var(--spacing-sm) var(--spacing-md);
-  background: transparent;
-  color: var(--color-text-secondary);
-  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  border: 2px solid var(--color-border);
   border-radius: var(--radius-md);
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
   transition: all var(--transition-fast);
-  display: inline-flex;
-  align-items: center;
-  gap: var(--spacing-sm);
+  font-family: inherit;
 }
 
-.filterCount {
-  font-size: 0.75rem;
-  padding: 2px 6px;
-  background: var(--color-border-light);
-  border-radius: var(--radius-sm);
-  font-weight: 600;
+.filterSelect:hover {
+  border-color: var(--color-primary-light);
 }
 
-.filterButtonActive .filterCount {
-  background: rgba(255, 255, 255, 0.3);
-  color: white;
+.filterSelect:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(0, 163, 224, 0.1);
 }
 
 .clearFiltersButton {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: var(--spacing-sm);
-  padding: var(--spacing-md) var(--spacing-lg);
+  padding: var(--spacing-sm) var(--spacing-lg);
   background: var(--color-error);
   color: white;
   border-radius: var(--radius-md);
@@ -134,31 +121,14 @@
   font-weight: 600;
   cursor: pointer;
   transition: all var(--transition-fast);
-  align-self: flex-start;
   box-shadow: var(--shadow-sm);
+  grid-column: 1 / -1;
 }
 
 .clearFiltersButton:hover {
   background: #dc2626;
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
-}
-
-.filterButton:hover {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
-  background: rgba(0, 163, 224, 0.05);
-}
-
-.filterButtonActive {
-  background: var(--color-primary);
-  color: white;
-  border-color: var(--color-primary);
-}
-
-.filterButtonActive:hover {
-  background: var(--color-primary-dark);
-  border-color: var(--color-primary-dark);
 }
 
 .viewToggle {

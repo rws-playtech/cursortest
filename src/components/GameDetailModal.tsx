@@ -88,8 +88,8 @@ export default function GameDetailModal({ game, onClose, onRequestActivation }: 
                 <div className={styles.infoItem}>
                   <span className={styles.infoLabel}>Volatility:</span>
                   <Tooltip content={getVolatilityTooltip(game.volatility)}>
-                    <span className={`${styles.infoValue} ${styles.volatilityBadge} ${styles[`volatility${game.volatility.replace(' ', '')}`]}`}>
-                      {game.volatility}
+                    <span className={`${styles.infoValue} ${styles.volatilityBadge} ${styles[getVolatilityColor(game.volatility)]}`}>
+                      {game.volatility}/5
                       <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor" style={{ marginLeft: '6px' }}>
                         <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                       </svg>
@@ -265,17 +265,26 @@ export default function GameDetailModal({ game, onClose, onRequestActivation }: 
   );
 }
 
-function getVolatilityTooltip(volatility: string): string {
+function getVolatilityTooltip(volatility: number): string {
   switch (volatility) {
-    case 'Low':
-      return 'Frequent small wins. Lower risk, steady gameplay.';
-    case 'Medium':
-      return 'Balanced mix of win frequency and value. Moderate risk.';
-    case 'High':
-      return 'Less frequent wins but higher values. Higher risk, bigger potential.';
-    case 'Very High':
-      return 'Rare wins with very high values. Maximum risk and reward potential.';
+    case 1:
+      return 'Very Low Volatility (1/5) - Very frequent small wins. Minimal risk, steady gameplay.';
+    case 2:
+      return 'Low Volatility (2/5) - Frequent small wins. Lower risk, steady gameplay.';
+    case 3:
+      return 'Medium Volatility (3/5) - Balanced mix of win frequency and value. Moderate risk.';
+    case 4:
+      return 'High Volatility (4/5) - Less frequent wins but higher values. Higher risk, bigger potential.';
+    case 5:
+      return 'Very High Volatility (5/5) - Rare wins with very high values. Maximum risk and reward potential.';
     default:
       return 'Indicates how often and how much the game pays out.';
   }
+}
+
+function getVolatilityColor(volatility: number): string {
+  if (volatility <= 2) return 'volatilityLow';
+  if (volatility === 3) return 'volatilityMedium';
+  if (volatility === 4) return 'volatilityHigh';
+  return 'volatilityVeryHigh';
 }

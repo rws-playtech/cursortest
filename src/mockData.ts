@@ -47,7 +47,7 @@ export const mockGames: Game[] = [
     provider: 'Playtech',
     studio: 'Origins Studio',
     theme: 'Mystical',
-    volatility: 'Medium',
+    volatility: 3,
     baseCost: 15000,
     maxWinMultiplier: 5000,
     jackpot: {
@@ -97,7 +97,7 @@ export const mockGames: Game[] = [
     provider: 'Playtech',
     studio: 'Firebird Studios',
     theme: 'Fantasy',
-    volatility: 'High',
+    volatility: 4,
     baseCost: 22000,
     maxWinMultiplier: 10000,
     jackpot: {
@@ -136,7 +136,7 @@ export const mockGames: Game[] = [
     provider: 'Playtech',
     studio: 'Live Casino Studios',
     theme: 'Classic Casino',
-    volatility: 'Low',
+    volatility: 1,
     baseCost: 35000,
     maxWinMultiplier: 35,
     jackpot: {
@@ -179,7 +179,7 @@ export const mockGames: Game[] = [
     provider: 'Playtech',
     studio: 'Live Casino Studios',
     theme: 'Classic Casino',
-    volatility: 'Low',
+    volatility: 1,
     baseCost: 28000,
     maxWinMultiplier: 30,
     jackpot: {
@@ -222,7 +222,7 @@ export const mockGames: Game[] = [
     provider: 'Playtech',
     studio: 'Origins Studio',
     theme: 'Adventure',
-    volatility: 'Medium',
+    volatility: 3,
     baseCost: 18000,
     maxWinMultiplier: 7500,
     jackpot: {
@@ -272,7 +272,7 @@ export const mockGames: Game[] = [
     provider: 'Playtech',
     studio: 'Digital Games',
     theme: 'Classic Casino',
-    volatility: 'Medium',
+    volatility: 3,
     baseCost: 12000,
     maxWinMultiplier: 4000,
     jackpot: {
@@ -315,7 +315,7 @@ export const mockGames: Game[] = [
     provider: 'Playtech',
     studio: 'Innovation Lab',
     theme: 'Gemstones',
-    volatility: 'Very High',
+    volatility: 5,
     baseCost: 20000,
     maxWinMultiplier: 15000,
     jackpot: {
@@ -358,7 +358,7 @@ export const mockGames: Game[] = [
     provider: 'Playtech',
     studio: 'Live Casino Studios',
     theme: 'Classic Casino',
-    volatility: 'Low',
+    volatility: 1,
     baseCost: 32000,
     maxWinMultiplier: 8,
     jackpot: {
