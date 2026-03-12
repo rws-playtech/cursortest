@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xenia Engagement Games - Reporting Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f5f7fa;
+            color: #2c3e50;
+            line-height: 1.6;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .controls {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .control-group label {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #666;
+        }
+
+        .control-group select,
+        .control-group input {
+            padding: 0.5rem 1rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            min-width: 180px;
+        }
+
+        .btn {
+            padding: 0.6rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            align-self: flex-end;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #667eea;
+            border: 1px solid #667eea;
+        }
+
+        .btn-secondary:hover {
+            background: #f0f2ff;
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .kpi-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border-left: 4px solid #667eea;
+        }
+
+        .kpi-card h3 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .kpi-card .value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+
+        .kpi-card .change {
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .change.positive {
+            color: #27ae60;
+        }
+
+        .change.negative {
+            color: #e74c3c;
+        }
+
+        .funnel-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .funnel-section h2 {
+            font-size: 1.25rem;
+            margin-bottom: 1.5rem;
+            color: #2c3e50;
+        }
+
+        .funnel-visual {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .funnel-stage {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .funnel-bar {
+            flex: 1;
+            height: 50px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1rem;
+            color: white;
+            font-weight: 500;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .funnel-bar:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .funnel-label {
+            min-width: 150px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .funnel-count {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .funnel-percentage {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            border-bottom: 2px solid #e0e0e0;
+            margin-bottom: 1.5rem;
+        }
+
+        .tab {
+            padding: 0.75rem 1.5rem;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab:hover {
+            color: #667eea;
+            background: #f0f2ff;
+        }
+
+        .data-table {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .data-table h2 {
+            font-size: 1.25rem;
+            margin-bottom: 1.5rem;
+            color: #2c3e50;
+        }
+
+        .table-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .search-box {
+            padding: 0.5rem 1rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            width: 300px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        thead {
+            background: #f8f9fa;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        th {
+            text-align: left;
+            padding: 0.75rem 1rem;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-failed {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .icon {
+            font-size: 1.2rem;
+        }
+
+        .icon-success {
+            color: #27ae60;
+        }
+
+        .icon-failed {
+            color: #e74c3c;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .pagination button {
+            padding: 0.5rem 1rem;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .pagination button:hover:not(:disabled) {
+            background: #f0f2ff;
+            border-color: #667eea;
+            color: #667eea;
+        }
+
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .failure-breakdown {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .sub-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .sub-card {
+            background: #f8f9ff;
+            border: 1px solid #e6e9ff;
+            padding: 1rem;
+            border-radius: 8px;
+        }
+
+        .sub-card .label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .sub-card .metric {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-top: 0.25rem;
+            color: #2c3e50;
+        }
+
+        .failure-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border-left: 4px solid #e74c3c;
+        }
+
+        .failure-card h3 {
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+            color: #2c3e50;
+        }
+
+        .failure-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .failure-item:last-child {
+            border-bottom: none;
+        }
+
+        .failure-reason {
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .failure-count {
+            font-weight: 600;
+            color: #e74c3c;
+        }
+
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .control-group select,
+            .control-group input {
+                width: 100%;
+            }
+
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .table-controls {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: stretch;
+            }
+
+            .search-box {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Xenia Engagement Games - Reporting Dashboard</h1>
+        <p>Comprehensive tracking and analytics for engagement game performance</p>
+    </div>
+
+    <div class="container">
+        <!-- Controls -->
+        <div class="controls">
+            <div class="control-group">
+                <label for="dateRange">Date Range</label>
+                <input type="text" id="dateRange" value="Dec 1, 2025 - Dec 12, 2025" />
+            </div>
+            <div class="control-group">
+                <label for="campaign">Campaign</label>
+                <select id="campaign">
+                    <option value="all">All Campaigns</option>
+                    <option value="eg-2025-001">Christmas Wheel</option>
+                    <option value="eg-2025-002">Welcome Bonus Game</option>
+                    <option value="eg-2025-003">Weekend Special</option>
+                    <option value="eg-2025-004">High Roller Reward</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label for="segment">Player Segment</label>
+                <select id="segment">
+                    <option value="all">All Segments</option>
+                    <option value="vip">VIP</option>
+                    <option value="high_roller">High Roller</option>
+                    <option value="regular">Regular</option>
+                    <option value="new_player">New Player</option>
+                </select>
+            </div>
+            <button class="btn btn-primary">Apply Filters</button>
+            <button class="btn btn-secondary">⬇ Export Report</button>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <h3>Total Qualified</h3>
+                <div class="value">15,847</div>
+                <div class="change positive">
+                    <span>↑ 8.3%</span>
+                    <span>vs last week</span>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <h3>Games Launched</h3>
+                <div class="value">9,234</div>
+                <div class="change positive">
+                    <span>↑ 12.3%</span>
+                    <span>vs last week</span>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <h3>Deferred ("Maybe later")</h3>
+                <div class="value">1,756</div>
+                <div class="change positive">
+                    <span>↑ 5.1%</span>
+                    <span>vs last week</span>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <h3>Launch Failures</h3>
+                <div class="value">178</div>
+                <div class="change negative">
+                    <span>↓ 0.4%</span>
+                    <span>vs last week</span>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <h3>Launch Rate</h3>
+                <div class="value">58.3%</div>
+                <div class="change positive">
+                    <span>↑ 3.2%</span>
+                    <span>vs last week</span>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <h3>Prizes Accepted</h3>
+                <div class="value">3,891</div>
+                <div class="change negative">
+                    <span>↓ 1.5%</span>
+                    <span>vs last week</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Funnel Visualization -->
+        <div class="funnel-section">
+            <h2>Engagement Funnel</h2>
+            <div class="funnel-visual">
+                <div class="funnel-stage">
+                    <div class="funnel-label">Qualified Users</div>
+                    <div class="funnel-bar" style="width: 100%;">
+                        <span class="funnel-count">15,847</span>
+                        <span class="funnel-percentage">100.0%</span>
+                    </div>
+                </div>
+                <div class="funnel-stage">
+                    <div class="funnel-label">Tagged Users</div>
+                    <div class="funnel-bar" style="width: 98.6%; opacity: 0.95;">
+                        <span class="funnel-count">15,623</span>
+                        <span class="funnel-percentage">98.6%</span>
+                    </div>
+                </div>
+                <div class="funnel-stage">
+                    <div class="funnel-label">Message Delivered</div>
+                    <div class="funnel-bar" style="width: 97.2%; opacity: 0.9;">
+                        <span class="funnel-count">15,401</span>
+                        <span class="funnel-percentage">97.2%</span>
+                    </div>
+                </div>
+                <div class="funnel-stage">
+                    <div class="funnel-label">Message Opened</div>
+                    <div class="funnel-bar" style="width: 76.6%; opacity: 0.85;">
+                        <span class="funnel-count">12,134</span>
+                        <span class="funnel-percentage">76.6%</span>
+                    </div>
+                </div>
+                <div class="funnel-stage">
+                    <div class="funnel-label">Game Launched</div>
+                    <div class="funnel-bar" style="width: 58.3%; opacity: 0.8;">
+                        <span class="funnel-count">9,234</span>
+                        <span class="funnel-percentage">58.3%</span>
+                    </div>
+                </div>
+                <div class="funnel-stage">
+                    <div class="funnel-label">Prize Won</div>
+                    <div class="funnel-bar" style="width: 28.5%; opacity: 0.75;">
+                        <span class="funnel-count">4,512</span>
+                        <span class="funnel-percentage">28.5%</span>
+                    </div>
+                </div>
+                <div class="funnel-stage">
+                    <div class="funnel-label">Prize Accepted</div>
+                    <div class="funnel-bar" style="width: 24.6%; opacity: 0.7;">
+                        <span class="funnel-count">3,891</span>
+                        <span class="funnel-percentage">24.6%</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sub-grid" aria-label="Initial decision breakdown">
+                <div class="sub-card">
+                    <div class="label">Launched immediately</div>
+                    <div class="metric">9,234</div>
+                </div>
+                <div class="sub-card">
+                    <div class="label">Deferred ("Maybe later")</div>
+                    <div class="metric">1,756</div>
+                </div>
+                <div class="sub-card">
+                    <div class="label">Declined ("No thanks")</div>
+                    <div class="metric">400</div>
+                </div>
+                <div class="sub-card">
+                    <div class="label">No action</div>
+                    <div class="metric">744</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="data-table">
+            <div class="tabs">
+                <button class="tab active">Detailed Journey</button>
+                <button class="tab">Failures</button>
+                <button class="tab">Retriggers</button>
+                <button class="tab">Prize Performance</button>
+                <button class="tab">Campaigns</button>
+            </div>
+
+            <!-- Table Controls -->
+            <div class="table-controls">
+                <input type="text" class="search-box" placeholder="Search by Player ID..." />
+                <div>
+                    <select style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 6px; margin-right: 0.5rem;">
+                        <option>All Status</option>
+                        <option>Completed</option>
+                        <option>Failed</option>
+                        <option>In Progress</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Data Table -->
+            <table>
+                <thead>
+                    <tr>
+                        <th>Player ID</th>
+                        <th>Date</th>
+                        <th>Offer State</th>
+                        <th>Status</th>
+                        <th>Initial Action</th>
+                        <th>Follow-up</th>
+                        <th>Launch</th>
+                        <th>Result</th>
+                        <th>Prize</th>
+                        <th>Action</th>
+                        <th>Failure</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>PLR-10001</td>
+                        <td>Dec 10, 14:23</td>
+                        <td>Consumed</td>
+                        <td><span class="status-badge status-success">Completed</span></td>
+                        <td>Launched</td>
+                        <td>-</td>
+                        <td>1 attempt · Success</td>
+                        <td>Won</td>
+                        <td>10 Free Spins</td>
+                        <td>Accepted</td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>PLR-10002</td>
+                        <td>Dec 10, 15:45</td>
+                        <td>Consumed</td>
+                        <td><span class="status-badge status-success">Completed</span></td>
+                        <td>Deferred</td>
+                        <td>Auto re-trigger (30m)</td>
+                        <td>1 attempt · Success</td>
+                        <td>Won</td>
+                        <td>$5 Bonus</td>
+                        <td>Accepted</td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>PLR-10003</td>
+                        <td>Dec 10, 16:12</td>
+                        <td>Consumed</td>
+                        <td><span class="status-badge status-success">Completed</span></td>
+                        <td>Deferred</td>
+                        <td>Auto re-trigger (next launch)</td>
+                        <td>1 attempt · Success</td>
+                        <td>Bad Luck</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>PLR-10004</td>
+                        <td>Dec 10, 17:30</td>
+                        <td>Available</td>
+                        <td><span class="status-badge status-failed">Failed</span></td>
+                        <td>No Action</td>
+                        <td>Auto scheduled (next launch)</td>
+                        <td>0 attempts</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>Message not opened (offline)</td>
+                    </tr>
+                    <tr>
+                        <td>PLR-10005</td>
+                        <td>Dec 10, 18:22</td>
+                        <td>Unknown</td>
+                        <td><span class="status-badge status-failed">Failed</span></td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>0 attempts</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>IMS timeout (delivery)</td>
+                    </tr>
+                    <tr>
+                        <td>PLR-10006</td>
+                        <td>Dec 10, 19:05</td>
+                        <td>Consumed</td>
+                        <td><span class="status-badge status-success">Completed</span></td>
+                        <td>Launched</td>
+                        <td>-</td>
+                        <td>1 attempt · Success</td>
+                        <td>Won</td>
+                        <td>20 Free Spins</td>
+                        <td>Declined</td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>PLR-10007</td>
+                        <td>Dec 10, 20:15</td>
+                        <td>Not Created</td>
+                        <td><span class="status-badge status-failed">Failed</span></td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>0 attempts</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>Tag assignment failed (duplicate)</td>
+                    </tr>
+                    <tr>
+                        <td>PLR-10008</td>
+                        <td>Dec 11, 08:30</td>
+                        <td>Consumed</td>
+                        <td><span class="status-badge status-success">Completed</span></td>
+                        <td>Deferred</td>
+                        <td>Manual trigger (Engagement Hub)</td>
+                        <td>1 attempt · Success</td>
+                        <td>Won</td>
+                        <td>$10 Bonus</td>
+                        <td>Accepted</td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>PLR-10009</td>
+                        <td>Dec 11, 09:12</td>
+                        <td>Consumed</td>
+                        <td><span class="status-badge status-success">Completed</span></td>
+                        <td>Launched</td>
+                        <td>Auto follow-up (after launch failure)</td>
+                        <td>2 attempts · Success</td>
+                        <td>Won</td>
+                        <td>10 Free Spins</td>
+                        <td>Accepted</td>
+                        <td>EG service unavailable (attempt 1)</td>
+                    </tr>
+                    <tr>
+                        <td>PLR-10010</td>
+                        <td>Dec 11, 10:45</td>
+                        <td>Available</td>
+                        <td><span class="status-badge status-pending">In Progress</span></td>
+                        <td>Deferred</td>
+                        <td>Auto re-trigger (30m) x2</td>
+                        <td>0 attempts</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Pagination -->
+            <div class="pagination">
+                <button disabled>← Previous</button>
+                <span>Page 1 of 1,585</span>
+                <button>Next →</button>
+            </div>
+        </div>
+
+        <!-- Failure Breakdown -->
+        <div class="funnel-section">
+            <h2>Failure Analysis</h2>
+            <div class="failure-breakdown">
+                <div class="failure-card">
+                    <h3>Tag Assignment Failures (224)</h3>
+                    <div class="failure-item">
+                        <span class="failure-reason">Duplicate Tag</span>
+                        <span class="failure-count">101 (45%)</span>
+                    </div>
+                    <div class="failure-item">
+                        <span class="failure-reason">Player Ineligible</span>
+                        <span class="failure-count">72 (32%)</span>
+                    </div>
+                    <div class="failure-item">
+                        <span class="failure-reason">Service Timeout</span>
+                        <span class="failure-count">51 (23%)</span>
+                    </div>
+                </div>
+
+                <div class="failure-card">
+                    <h3>Message Delivery Failures (222)</h3>
+                    <div class="failure-item">
+                        <span class="failure-reason">IMS Service Timeout</span>
+                        <span class="failure-count">129 (58%)</span>
+                    </div>
+                    <div class="failure-item">
+                        <span class="failure-reason">Player Offline</span>
+                        <span class="failure-count">69 (31%)</span>
+                    </div>
+                    <div class="failure-item">
+                        <span class="failure-reason">Invalid Template</span>
+                        <span class="failure-count">24 (11%)</span>
+                    </div>
+                </div>
+
+                <div class="failure-card">
+                    <h3>Game Launch Failures (178)</h3>
+                    <div class="failure-item">
+                        <span class="failure-reason">EG Service Unavailable</span>
+                        <span class="failure-count">75 (42%)</span>
+                    </div>
+                    <div class="failure-item">
+                        <span class="failure-reason">Client Connectivity</span>
+                        <span class="failure-count">68 (38%)</span>
+                    </div>
+                    <div class="failure-item">
+                        <span class="failure-reason">Invalid Game Config</span>
+                        <span class="failure-count">35 (20%)</span>
+                    </div>
+                </div>
+
+                <div class="failure-card">
+                    <h3>Prize Redemption Failures (89)</h3>
+                    <div class="failure-item">
+                        <span class="failure-reason">Prize Service Timeout</span>
+                        <span class="failure-count">50 (56%)</span>
+                    </div>
+                    <div class="failure-item">
+                        <span class="failure-reason">Inventory Unavailable</span>
+                        <span class="failure-count">30 (34%)</span>
+                    </div>
+                    <div class="failure-item">
+                        <span class="failure-reason">Account Limitation</span>
+                        <span class="failure-count">9 (10%)</span>
+                    </div>
+                </div>
+
+                <div class="failure-card">
+                    <h3>Offer Lifecycle (Lost/Expired)</h3>
+                    <div class="failure-item">
+                        <span class="failure-reason">Player declined ("No thanks")</span>
+                        <span class="failure-count">400</span>
+                    </div>
+                    <div class="failure-item">
+                        <span class="failure-reason">Offer expired (unclaimed)</span>
+                        <span class="failure-count">—</span>
+                    </div>
+                    <div class="failure-item">
+                        <span class="failure-reason">Max retriggers reached</span>
+                        <span class="failure-count">—</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simple tab switching functionality
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Add hover effects and interactions
+        console.log('Xenia Reporting Dashboard initialized');
+    </script>
+</body>
+</html>
